@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ProductController = require("../controllers/product.controller");
 // const authMiddleware = require("../middleware/auth.middleware");
-const uploadMiddleware = require("../middleware/upload.middleware");
+// const uploadMiddleware = require("../middleware/upload.middleware");
 
 // router.get("/", authMiddleware, ProductController.getProductList);
 // router.post(
@@ -19,15 +19,7 @@ const uploadMiddleware = require("../middleware/upload.middleware");
 // );
 
 router.get("/", ProductController.getProductList);
-router.post(
-  "/",
-  uploadMiddleware.array("photos"),
-  ProductController.createProduct
-);
-router.put(
-  "/:productId",
-  uploadMiddleware.array("photos"),
-  ProductController.updateProduct
-);
+router.post("/", ProductController.createProduct);
+router.put("/:productId", ProductController.updateProduct);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const UserModel = require("./app/models/user.model"); // Đảm bảo đường dẫn đúng
+const ProductModel = require("./app/models/product.model"); // Đảm bảo đường dẫn đúng
 
 // Kết nối tới MongoDB
 mongoose
@@ -21,99 +21,113 @@ async function createUsers() {
     // Tạo một danh sách người dùng mới
     const users = [
       {
-        user_id: "U001",
-        username: "john_doe",
-        email: "john.doe@example.com",
-        password: "123456",
-        address: {
-          Street: "123 Main St",
-          Ward: "Ward 1",
-          District: "District 1",
-          City: "New York",
-          Country: "USA",
-          PostalCode: "10001",
+        product_id: "NK-AM-270-001",
+        product_name: "Nike Air Max 270",
+        description:
+          "Lifestyle sneaker with large Air unit for maximum comfort and modern style",
+        category_id: "LIFESTYLE_SHOES",
+        manufacturer_id: "NIKE",
+        creation_time: "2020-07-22T15:40:00Z",
+        specifications: {
+          length: "27 cm",
+          width: "10.5 cm",
+          weight: "340 g",
+          material: "Mesh and Synthetic Leather",
+          origin: "China",
+          size_range: "US 6-13",
         },
-        role: "Customer",
-        avatar: "avatar1.jpg",
-        current_orders: ["order1", "order2"],
-        is_active: true,
+        photos: [
+          "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/gorfwjchoasrrzr1fggt/AIR+MAX+270.png",
+          "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/ee277c7b-7765-4b8a-bbc6-3393ea7c0631/AIR+MAX+270.png",
+        ],
       },
       {
-        user_id: "U002",
-        username: "jane_doe",
-        email: "jane.doe@example.com",
-        password: "password123",
-        address: {
-          Street: "456 Elm St",
-          Ward: "Ward 2",
-          District: "District 2",
-          City: "Los Angeles",
-          Country: "USA",
-          PostalCode: "90001",
+        product_id: "AD-ULTRABOOST-002",
+        product_name: "Adidas Ultraboost",
+        description:
+          "High-performance running shoes with responsive cushioning.",
+        category_id: "RUNNING_SHOES",
+        manufacturer_id: "ADIDAS",
+        creation_time: "2020-08-15T10:00:00Z",
+        specifications: {
+          length: "26 cm",
+          width: "10 cm",
+          weight: "340 g",
+          material: "Primeknit",
+          origin: "Vietnam",
+          size_range: "US 5-12",
         },
-        role: "Admin",
-        avatar: "avatar2.jpg",
-        current_orders: ["order3", "order4"],
-        is_active: true,
+        photos: [
+          "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/53a3ca19c06b4c5abc39131398fae837_9366/Giay_Ultraboost_5x_DJen_JI1334_HM3_hover.jpg",
+          "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/99933e8f66514773996d6e3c347b6e53_9366/Giay_Ultraboost_5x_trang_IH0638_HM3_hover.jpg",
+        ],
       },
       {
-        user_id: "U003",
-        username: "alice_smith",
-        email: "alice.smith@example.com",
-        password: "alicepass",
-        address: {
-          Street: "789 Oak St",
-          Ward: "Ward 3",
-          District: "District 3",
-          City: "Chicago",
-          Country: "USA",
-          PostalCode: "60601",
+        product_id: "PUMA-RS-X-003",
+        product_name: "Puma RS-X",
+        description: "Retro-inspired sneaker with bold colors and cushioning.",
+        category_id: "LIFESTYLE_SHOES",
+        manufacturer_id: "PUMA",
+        creation_time: "2020-09-10T12:30:00Z",
+        specifications: {
+          length: "27 cm",
+          width: "11 cm",
+          weight: "350 g",
+          material: "Mesh and Synthetic",
+          origin: "China",
+          size_range: "US 6-13",
         },
-        role: "Customer",
-        avatar: "avatar3.jpg",
-        current_orders: ["order5"],
-        is_active: false,
+        photos: [
+          "https://authentic-shoes.com/wp-content/uploads/2023/04/369818_08.png_c0d906b4dd0c4ab6a4ca8e3c59fa0256.png",
+          "https://authentic-shoes.com/wp-content/uploads/2023/04/557163_01.jpg_5bd6d22699164eb4bb39b7b7ea7cd446-1536x791.png",
+        ],
       },
       {
-        user_id: "U004",
-        username: "bob_jones",
-        email: "bob.jones@example.com",
-        password: "bobpass123",
-        address: {
-          Street: "101 Pine St",
-          Ward: "Ward 4",
-          District: "District 4",
-          City: "San Francisco",
-          Country: "USA",
-          PostalCode: "94101",
+        product_id: "NB-990V5-004",
+        product_name: "New Balance 990v5",
+        description:
+          "Classic running shoe with premium materials and cushioning.",
+        category_id: "RUNNING_SHOES",
+        manufacturer_id: "NEW_BALANCE",
+        creation_time: "2020-10-05T14:00:00Z",
+        specifications: {
+          length: "28 cm",
+          width: "10.5 cm",
+          weight: "400 g",
+          material: "Suede and Mesh",
+          origin: "USA",
+          size_range: "US 7-14",
         },
-        role: "Admin",
-        avatar: "avatar4.jpg",
-        current_orders: ["order6", "order7", "order8"],
-        is_active: true,
+        photos: [
+          "https://authentic-shoes.com/wp-content/uploads/2023/04/1613109025729_newbalance2_473f9b5a36d44d3a8880d5c227ca1b90.jpeg",
+          "https://authentic-shoes.com/wp-content/uploads/2023/04/6aa63decf325f2dc8ccaa8bae895439f_fd9b6d22db894331959c3d7dc39b3e16.png",
+        ],
       },
       {
-        user_id: "U005",
-        username: "carol_williams",
-        email: "carol.williams@example.com",
-        password: "carolpass",
-        address: {
-          Street: "202 Maple St",
-          Ward: "Ward 5",
-          District: "District 5",
-          City: "Miami",
-          Country: "USA",
-          PostalCode: "33101",
+        product_id: "ASICS-GEL-KAYANO-005",
+        product_name: "ASICS Gel-Kayano",
+        description:
+          "Stability running shoe with excellent support and cushioning.",
+        category_id: "RUNNING_SHOES",
+        manufacturer_id: "ASICS",
+        creation_time: "2020-11-01T09:00:00Z",
+        specifications: {
+          length: "27.5 cm",
+          width: "10.5 cm",
+          weight: "350 g",
+          material: "Mesh",
+          origin: "Vietnam",
+          size_range: "US 6-12",
         },
-        role: "Customer",
-        avatar: "avatar5.jpg",
-        current_orders: ["order9", "order10"],
-        is_active: true,
+        photos: [
+          "https://cms-static.asics.com/media-libraries/65528/file.jpg?",
+          "https://cms-static.asics.com/media-libraries/67922/file.pcp.png?",
+        ],
       },
     ];
 
     // Lưu tất cả người dùng vào cơ sở dữ liệu
-    const savedUsers = await UserModel.insertMany(users);
+    const savedUsers = await ProductModel.insertMany(users);
 
     console.log("Users saved:", savedUsers);
   } catch (error) {

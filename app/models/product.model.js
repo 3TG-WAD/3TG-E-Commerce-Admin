@@ -3,38 +3,46 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 
 const ProductSchema = new mongoose.Schema(
   {
-    ProductID: {
+    product_id: {
       type: String,
       required: true,
       unique: true,
     },
-    ProductName: {
+    product_name: {
       type: String,
       required: true,
       trim: true,
     },
-    Description: {
+    description: {
       type: String,
       trim: true,
     },
-    CategoryID: {
+    category_id: {
       type: String,
       ref: "Category",
     },
-    ManufacturerID: {
+    manufacturer_id: {
       type: String,
       ref: "Manufacturer",
     },
-    CreationTime: {
+    creation_time: {
       type: Date,
       default: Date.now,
     },
-    Specifications: {
-      Length: String,
-      Width: String,
-      Origin: String,
+    specifications: {
+      length: String,
+      width: String,
+      origin: String,
+      weight: String,
+      material: String,
+      size_range: String,
+      color: [String],
+      fit: String,
+      capacity: String,
+      features: String,
+      dimensions: String,
     },
-    Photos: [
+    photos: [
       {
         type: String,
         validate: {
