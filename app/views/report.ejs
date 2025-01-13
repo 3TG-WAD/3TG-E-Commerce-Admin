@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Report</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link rel="stylesheet" href="/css/Report.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="report-container">
+      <%- include('./components/sidebar', { currentPage: 'report' }) %>
+
+      <main class="report-content">
+        <header class="report-header">
+          <h1>Revenue Report</h1>
+          <div class="header-actions">
+            <form method="get" action="/api/reports">
+              <label for="start-date">From:</label>
+              <input
+                type="date"
+                id="start-date"
+                name="startDate"
+                value="<%= startDate || '' %>"
+                required
+              />
+              <label for="end-date">To:</label>
+              <input
+                type="date"
+                id="end-date"
+                name="endDate"
+                value="<%= endDate || '' %>"
+                required
+              />
+              <button type="submit" class="btn btn-apply-filter">
+                <i class="fas fa-filter"></i> Apply
+              </button>
+            </form>
+          </div>
+        </header>
+
+        <section class="report-stats">
+          <div class="stat-card">
+            <h3>Total Revenue</h3>
+            <h2>
+              <%= totalRevenue.toLocaleString("vi-VN", { style: "currency",
+              currency: "VND" }) %>
+            </h2>
+          </div>
+        </section>
+
+        <section class="top-products">
+          <h3>Top Revenue-Generating Products</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity Sold</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (topProducts.length > 0) { %> <%
+              topProducts.forEach(function(product) { %>
+              <tr>
+                <td><%= product.product_name %></td>
+                <td><%= product.totalSold %></td>
+                <td>
+                  <%= product.totalRevenue.toLocaleString("vi-VN", { style:
+                  "currency", currency: "VND" }) %>
+                </td>
+              </tr>
+              <% }) %> <% } else { %>
+              <tr>
+                <td colspan="3">
+                  No data available for the selected date range.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

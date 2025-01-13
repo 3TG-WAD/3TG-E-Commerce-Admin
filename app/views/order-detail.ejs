@@ -1,0 +1,178 @@
+<%# views/order-details.ejs %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Order Details - <%= order.order_id %></title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      .dashboard-container {
+        display: flex;
+      }
+
+      .order-details-content {
+        flex-grow: 1;
+        padding: 20px;
+        margin-left: 250px;
+        width: calc(100% - 250px);
+        display: flex;
+        justify-content: center;
+      }
+
+      .order-details-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+        padding: 30px;
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+      }
+
+      .order-header .back-btn {
+        font-size: 24px;
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .order-header .back-btn:hover {
+        color: #0056b3;
+      }
+
+      .order-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .order-details-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .order-details-table th,
+      .order-details-table td {
+        border: 1px solid #e0e0e0;
+        padding: 10px;
+        text-align: left;
+      }
+
+      .order-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+
+      .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+      }
+      .status-shipped {
+        background-color: #17a2b8;
+        color: white;
+      }
+      .status-delivered {
+        background-color: #28a745;
+        color: white;
+      }
+      .status-cancelled {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      @media (max-width: 768px) {
+        .order-details-content {
+          margin-left: 0;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('./components/sidebar', { currentPage: 'orders' }) %>
+
+      <div class="order-details-content">
+        <div class="order-details-card">
+          <div class="order-header">
+            <a href="/api/orders" class="back-btn">
+              <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2>Order Details #<%= order.order_id %></h2>
+          </div>
+
+          <div class="order-info">
+            <div>
+              <strong>Customer:</strong> <%= order.buyer.Name %><br />
+              <strong>Phone:</strong> <%= order.buyer.Phone %>
+            </div>
+            <div>
+              <strong>Status:</strong>
+              <span
+                class="order-status status-<%= order.status.toLowerCase() %>"
+              >
+                <%= order.status %>
+              </span>
+            </div>
+          </div>
+
+          <div class="order-address">
+            <strong>Shipping Address:</strong><br />
+            <%= order.shipping_address %>
+          </div>
+
+          <table class="order-details-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Color/Size</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% order.order_details.forEach(function(detail) { %>
+              <tr>
+                <td><%= detail.product_id.product_name %></td>
+                <td>
+                  <%= detail.variant_id.color %>, <%= detail.variant_id.size %>
+                </td>
+                <td><%= detail.quantity %></td>
+                <td><%= formatCurrency(detail.price_at_purchase) %></td>
+                <td>
+                  <%= formatCurrency(detail.quantity * detail.price_at_purchase)
+                  %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4"><strong>Shipping Cost:</strong></td>
+                <td><%= formatCurrency(order.order_shipping_cost) %></td>
+              </tr>
+              <tr>
+                <td colspan="4"><strong>Total Amount:</strong></td>
+                <td><%= formatCurrency(order.total_amount) %></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

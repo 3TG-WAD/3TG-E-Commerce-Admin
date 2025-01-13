@@ -1,0 +1,113 @@
+<%# views/dashboard.ejs %>
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('./components/sidebar', { currentPage: 'dashboard' }) %>
+
+      <main class="dashboard-content">
+        <header class="dashboard-header">
+          <h1>Summary</h1>
+        </header>
+
+        <section class="dashboard-stats">
+          <div class="stat-card">
+            <h3>Total of Orders</h3>
+            <h2><%= totalOrders %></h2>
+          </div>
+          <div class="stat-card">
+            <h3>Revenue</h3>
+            <h2><%= formatCurrency(totalRevenue) %></h2>
+          </div>
+        </section>
+
+        <section class="recent-orders">
+          <div class="orders-section">
+            <div class="filter-section">
+              <select id="status-filter">
+                <option value="">All status</option>
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <button id="apply-status-filter" class="btn-apply-filter">
+                <i class="fas fa-filter"></i> Filter
+              </button>
+            </div>
+
+            <table class="table" id="order-table">
+              <thead>
+                <tr>
+                  <th>Mã Đơn</th>
+                  <th>Khách Hàng</th>
+                  <th>Sản Phẩm</th>
+                  <th>Tổng Tiền</th>
+                  <th>Trạng Thái</th>
+                  <th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentOrders.forEach(function(order) { %>
+                <tr>
+                  <td><%= order.order_id %></td>
+                  <td><%= order.user_id.username %></td>
+                  <td>
+                    <% order.order_details.forEach(function(detail) { %> <%=
+                    detail.product_id.product_name %> (<%=
+                    detail.variant_id.color %>)<br />
+                    <% }); %>
+                  </td>
+                  <td><%= formatCurrency(order.total_amount) %></td>
+                  <td>
+                    <span class="badge <%= getStatusClass(order.status) %>">
+                      <%= order.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <a href="#!" class="btn btn-sm btn-info"> Chi Tiết </a>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+
+            <div class="pagination">
+              <% for(let i = 1; i <= totalPages; i++) { %>
+              <a
+                href="?page=<%= i %>&status=<%= currentStatus || '' %>"
+                class="<%= currentPage === i ? 'active' : '' %>"
+              >
+                <%= i %>
+              </a>
+              <% } %>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/orders.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const statusFilter = document.getElementById("status-filter");
+        const applyFilterBtn = document.getElementById("apply-status-filter");
+
+        applyFilterBtn.addEventListener("click", function () {
+          const selectedStatus = statusFilter.value;
+          window.location.href = `?status=${selectedStatus}`;
+        });
+      });
+    </script>
+  </body>
+</html>

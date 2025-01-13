@@ -21,6 +21,10 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       ref: "Category",
     },
+    price: {
+      type: Number,
+      required: true,
+    },
     manufacturer_id: {
       type: String,
       ref: "Manufacturer",
@@ -53,6 +57,11 @@ const ProductSchema = new mongoose.Schema(
         },
       },
     ],
+    status: {
+      type: String,
+      enum: ["active", "inactive", "out_of_stock"], // Các giá trị hợp lệ
+      default: "active", // Giá trị mặc định
+    },
   },
   {
     timestamps: true,

@@ -3,17 +3,17 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 
 const OrderSchema = new mongoose.Schema(
   {
-    OrderID: {
+    order_id: {
       type: String,
       required: true,
       unique: true,
     },
-    UserID: {
+    user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    Buyer: {
+    buyer: {
       Name: {
         type: String,
         required: true,
@@ -23,47 +23,51 @@ const OrderSchema = new mongoose.Schema(
         required: true,
       },
     },
-    TotalAmount: {
+    total_amount: {
       type: Number,
       required: true,
       min: 0,
     },
-    OrderDetails: [
+    order_details: [
       {
-        ProductID: {
+        product_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
         },
-        VariantID: {
+        variant_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Variant",
           required: true,
         },
-        Quantity: {
+        quantity: {
           type: Number,
           required: true,
           min: 1,
         },
-        PriceAtPurchase: {
+        price_at_purchase: {
           type: Number,
           required: true,
           min: 0,
         },
       },
     ],
-    Status: {
+    status: {
       type: String,
       enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
       default: "Pending",
     },
-    OrderAddress: {
+    shipping_address: {
+      type: String,
+      required: true,
+    },
+    order_address: {
       Street: String,
       City: String,
       Country: String,
       PostalCode: String,
     },
-    OrderShippingCost: {
+    order_shipping_cost: {
       type: Number,
       default: 0,
       min: 0,
@@ -77,14 +81,14 @@ const OrderSchema = new mongoose.Schema(
 OrderSchema.plugin(mongoosePaginate);
 
 OrderSchema.methods.updateStatus = function (newStatus) {
-  this.Status = newStatus;
+  this.status = newStatus;
   return this.save();
 };
 
 OrderSchema.methods.calculateTotalAmount = function () {
-  return this.OrderDetails.reduce(
-    (total, item) => total + item.Quantity * item.PriceAtPurchase,
-    this.OrderShippingCost
+  return this.order_details.reduce(
+    (total, item) => total + item.quantity * item.price_at_purchase,
+    this.order_shipping_cost
   );
 };
 

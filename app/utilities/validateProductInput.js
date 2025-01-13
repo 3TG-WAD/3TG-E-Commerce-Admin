@@ -6,7 +6,8 @@ const ProductSchema = z.object({
   description: z.string().optional(), // Optional
   category_id: z.string().optional(), // Optional
   manufacturer_id: z.string().optional(), // Optional
-  creation_time: z.string().optional(), // Optional
+  creation_time: z.string().optional(),
+  price: z.number(),
   specifications: z
     .object({
       material: z.string().optional(),
@@ -15,7 +16,8 @@ const ProductSchema = z.object({
       fit: z.string().optional(),
     })
     .optional(),
-  photos: z.array(z.string().url("Invalid photo URL")).optional(), // Optional
+  photos: z.array(z.string().url("Invalid photo URL")).optional(),
+  status: z.enum(["active", "inactive", "out_of_stock"]).optional(),
 });
 
 function validateProductInput(data) {

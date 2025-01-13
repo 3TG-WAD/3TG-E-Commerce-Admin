@@ -1,0 +1,253 @@
+<%# views/user.ejs %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>User Management</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link rel="stylesheet" href="/css/User.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('./components/sidebar', { currentPage: 'users' }) %>
+
+      <main class="dashboard-content">
+        <header class="dashboard-header">
+          <h1>User List</h1>
+        </header>
+
+        <section class="user-filters">
+          <div class="filter-row">
+            <input
+              type="text"
+              id="name-filter"
+              placeholder="Search by name"
+              class="form-control"
+            />
+            <input
+              type="text"
+              id="email-filter"
+              placeholder="Email"
+              class="form-control"
+            />
+            <input
+              type="text"
+              id="role-filter"
+              placeholder="Role"
+              class="form-control"
+            />
+            <button id="apply-filter" class="btn btn-secondary">
+              <i class="fas fa-filter"></i> Filter
+            </button>
+          </div>
+        </section>
+
+        <section class="user-table-section">
+          <div class="sort-controls">
+            <label>Sort by:</label>
+            <select id="sort-by">
+              <option value="username" <%= currentSortBy === 'username' ? 'selected' : '' %>>Username</option>
+              <option value="email" <%= currentSortBy === 'email' ? 'selected' : '' %>>Email</option>
+              <option value="role" <%= currentSortBy === 'role' ? 'selected' : '' %>>Role</option>
+            </select>
+            <select id="sort-order">
+              <option value="asc" <%= currentSortOrder === 'asc' ? 'selected' : '' %>>Ascending</option>
+              <option value="desc" <%= currentSortOrder === 'desc' ? 'selected' : '' %>>Descending</option>
+            </select>
+          </div>
+
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="user-list">
+              <% users.forEach(function(user) { %>
+              <tr data-user-id="<%= user._id %>">
+                <td>
+                  <img
+                    src="<%= 
+                          user.avatar 
+                            ? user.avatar 
+                            : '/images/default-avatar.png' 
+                        %>"
+                    alt="<%= user.username %>"
+                    class="user-avatar"
+                  />
+                </td>
+                <td><%= user.username %></td>
+                <td><%= user.email %></td>
+                <td><%= user.role %></td>
+                <td>
+                  <span class="badge <%= user.is_active ? 'badge-success' : 'badge-danger' %>">
+                    <%= user.is_active ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn btn-sm btn-info edit-user"
+                      data-user-id="<%= user._id %>"
+                      onclick="window.location.href='/api/users/<%= user._id %>'"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-danger delete-user"
+                      data-user-id="<%= user._id %>"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="pagination-section">
+          <div class="pagination-controls">
+            <% if (currentPage > 1) { %>
+              <a 
+                href="/api/users?page=1&username=<%= currentUsername || '' %>&email=<%= currentEmail || '' %>&role=<%= currentRole || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a 
+                href="/api/users?page=<%= currentPage - 1 %>&username=<%= currentUsername || '' %>&email=<%= currentEmail || '' %>&role=<%= currentRole || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-left"></i> Previous
+              </a>
+            <% } %>
+
+            <span>Page <%= currentPage %> / <%= totalPages %></span>
+
+            <% if (currentPage < totalPages) { %>
+              <a 
+                href="/api/users?page=<%= currentPage + 1 %>&username=<%= currentUsername || '' %>&email=<%= currentEmail || '' %>&role=<%= currentRole || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                Next <i class="fas fa-angle-right"></i>
+              </a>
+              <a 
+                href="/api/users?page=<%= totalPages %>&username=<%= currentUsername || '' %>&email=<%= currentEmail || '' %>&role=<%= currentRole || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            <% } %>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const sortBySelect = document.getElementById('sort-by');
+        const sortOrderSelect = document.getElementById('sort-order');
+        const applyFilterBtn = document.getElementById("apply-filter");
+        const nameFilter = document.getElementById("name-filter");
+        const emailFilter = document.getElementById("email-filter");
+        const roleFilter = document.getElementById("role-filter");
+
+        // Handling sorting
+        function applySorting() {
+          const sortBy = sortBySelect.value;
+          const sortOrder = sortOrderSelect.value;
+          
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set("sortBy", sortBy);
+          currentUrl.searchParams.set("sortOrder", sortOrder);
+
+          window.location.href = currentUrl.toString();
+        }
+
+        sortBySelect.addEventListener('change', applySorting);
+        sortOrderSelect.addEventListener('change', applySorting);
+
+        // Handling filtering
+        applyFilterBtn.addEventListener("click", function () {
+          const username = nameFilter.value.trim();
+          const email = emailFilter.value.trim();
+          const role = roleFilter.value.trim();
+
+          const queryParams = new URLSearchParams({
+            username: username,
+            email: email,
+            role: role,
+          }).toString();
+
+          window.location.href = `/api/users?${queryParams}`;
+        });
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        // Sự kiện cho nút xóa người dùng
+        document.getElementById('user-list').addEventListener('click', function(event) {
+          const deleteButton = event.target.closest('.delete-user');
+          
+          if (deleteButton) {
+            const userId = deleteButton.getAttribute('data-user-id');
+            console.log(userId);
+            
+            // Hiển thị xác nhận
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái người dùng này?')) {
+              toggleUserStatus(userId);
+            }
+          }
+        });
+      
+        // Hàm gọi API thay đổi trạng thái
+        async function toggleUserStatus(userId) {
+          try {
+            const response = await fetch(`/api/users/${userId}/status`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+      
+            const result = await response.json();
+      
+            if (result.success) {
+              // Cập nhật trạng thái trên giao diện
+              const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+              const statusBadge = userRow.querySelector('.badge');
+              
+              if (result.data.is_active) {
+                statusBadge.textContent = 'Active';
+                statusBadge.classList.remove('badge-danger');
+                statusBadge.classList.add('badge-success');
+              } else {
+                statusBadge.textContent = 'Inactive';
+                statusBadge.classList.remove('badge-success');
+                statusBadge.classList.add('badge-danger');
+              }
+      
+              alert('Thay đổi trạng thái người dùng thành công');
+            } else {
+              alert(result.message || 'Có lỗi xảy ra');
+            }
+          } catch (error) {
+            console.error('Lỗi:', error);
+            alert('Không thể thay đổi trạng thái người dùng');
+          }
+        }
+      });
+        </script>
+      </body>
+</html>

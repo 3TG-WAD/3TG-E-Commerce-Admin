@@ -1,0 +1,495 @@
+<%# views/product.ejs %>
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quản Lý Sản Phẩm</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link rel="stylesheet" href="/css/Product.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('./components/sidebar', { currentPage: 'products' }) %>
+
+      <main class="dashboard-content">
+        <header class="dashboard-header">
+          <h1>Danh Sách Sản Phẩm</h1>
+          <div class="header-actions">
+            <button id="add-product-btn" class="btn btn-primary">
+              <i class="fas fa-plus"></i> Thêm Sản Phẩm
+            </button>
+          </div>
+        </header>
+
+        <section class="product-filters">
+          <div class="filter-row">
+            <input
+              type="text"
+              id="name-filter"
+              placeholder="Tìm kiếm theo tên"
+              class="form-control"
+            />
+            <input
+              type="text"
+              id="category-filter"
+              placeholder="Danh Mục"
+              class="form-control"
+            />
+            <input
+              type="text"
+              id="manufacturer-filter"
+              placeholder="Nhà Sản Xuất"
+              class="form-control"
+            />
+            <button id="apply-filter" class="btn btn-secondary">
+              <i class="fas fa-filter"></i> Lọc
+            </button>
+          </div>
+        </section>
+
+        <section class="product-table-section">
+          <div class="sort-controls">
+            <label>Sắp xếp theo:</label>
+            <select id="sort-by">
+              <option value="product_name" <%= currentSortBy === 'product_name' ? 'selected' : '' %>>Tên Sản Phẩm</option>
+              <option value="category_id" <%= currentSortBy === 'category_id' ? 'selected' : '' %>>Danh Mục</option>
+              <option value="manufacturer_id" <%= currentSortBy === 'manufacturer_id' ? 'selected' : '' %>>Nhà Sản Xuất</option>
+              <option value="status" <%= currentSortBy === 'status' ? 'selected' : '' %>>Trạng Thái</option>
+            </select>
+            <select id="sort-order">
+              <option value="asc" <%= currentSortOrder === 'asc' ? 'selected' : '' %>>Tăng dần</option>
+              <option value="desc" <%= currentSortOrder === 'desc' ? 'selected' : '' %>>Giảm dần</option>
+            </select>
+          </div>
+
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product name</th>
+                <th>Category</th>
+                <th>Manufacturer</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="product-list">
+              <% products.forEach(function(product) { %>
+              <tr data-product-id="<%= product._id %>">
+                <td>
+                  <img
+                    src="<%= 
+                          (product.photos && product.photos[0]) 
+                            ? product.photos[0] 
+                            : '/images/default-product.png' 
+                        %>"
+                    alt="<%= product.product_name %>"
+                    class="product-thumbnail"
+                  />
+                </td>
+                <td><%= product.product_name %></td>
+                <td><%= product.category_id %></td>
+                <td><%= product.manufacturer_id %></td>
+                <td><%= product.price %></td>
+                <td>
+                  <span class="badge <%= getStatusClass(product.status) %>">
+                    <%= product.status %>
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn btn-sm btn-info edit-product"
+                      data-product-id="<%= product._id %>"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-danger delete-product"
+                      data-product-id="<%= product._id %>"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="pagination-section">
+          <div class="pagination-controls">
+            <% if (currentPage > 1) { %>
+              <a 
+                href="/api/products?page=1&name=<%= currentName || '' %>&category=<%= currentCategory || '' %>&manufacturer=<%= currentManufacturer || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a 
+                href="/api/products?page=<%= currentPage - 1 %>&name=<%= currentName || '' %>&category=<%= currentCategory || '' %>&manufacturer=<%= currentManufacturer || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-left"></i> Trang trước
+              </a>
+            <% } %>
+
+            <span>Trang <%= currentPage %> / <%= totalPages %></span>
+
+            <% if (currentPage < totalPages) { %>
+              <a 
+                href="/api/products?page=<%= currentPage + 1 %>&name=<%= currentName || '' %>&category=<%= currentCategory || '' %>&manufacturer=<%= currentManufacturer || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                Trang tiếp <i class="fas fa-angle-right"></i>
+              </a>
+              <a 
+                href="/api/products?page=<%= totalPages %>&name=<%= currentName || '' %>&category=<%= currentCategory || '' %>&manufacturer=<%= currentManufacturer || '' %>&sortBy=<%= currentSortBy %>&sortOrder=<%= currentSortOrder %>" 
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            <% } %>
+          </div>
+        </section>
+
+        <div id="product-modal" class="modal">
+          <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Add New Product</h2>
+            <form id="product-form">
+              <input type="hidden" id="product-id" name="productId" />
+        
+              <div class="form-group">
+                <label>Product Name</label>
+                <input
+                  type="text"
+                  id="product-name"
+                  name="product_name"
+                  placeholder="Enter product name"
+                  required
+                />
+              </div>
+        
+              <div class="form-group">
+                <label>Category</label>
+                <input
+                  type="text"
+                  id="product-category"
+                  name="category_id"
+                  placeholder="Enter category"
+                  required
+                />
+              </div>
+        
+              <div class="form-group">
+                <label>Manufacturer</label>
+                <input
+                  type="text"
+                  id="product-manufacturer"
+                  name="manufacturer_id"
+                  placeholder="Enter manufacturer"
+                  required
+                />
+              </div>
+        
+              <div class="form-group">
+                <label>Description</label>
+                <textarea
+                  id="product-description"
+                  name="description"
+                  placeholder="Enter product description"
+                  rows="3"
+                ></textarea>
+              </div>
+        
+              <div class="form-group">
+                <label>Price</label>
+                <input
+                  type="number"
+                  id="product-price"
+                  name="price"
+                  placeholder="Enter product price"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+        
+              <div class="form-group">
+                <label>Status</label>
+                <select id="product-status" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="out_of_stock">Out of stock</option>
+                </select>
+              </div>
+        
+              <div class="form-group">
+                <label>Product Images (URLs)</label>
+                <textarea
+                  id="product-photos"
+                  name="photos"
+                  placeholder="Enter image URLs (separate by comma)"
+                  rows="3"
+                ></textarea>
+              </div>
+        
+              <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">
+                  Save Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="updateStatusModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background-color: white; width: 300px; margin: 100px auto; padding: 20px; border-radius: 8px;">
+            <h2>Update Product Status</h2>
+            <form id="updateStatusForm">
+                <input type="hidden" id="modalProductId" name="productId">
+                <div class="form-group">
+                    <label for="newStatus">Select New Status:</label>
+                    <select id="newStatus" class="form-control">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <button type="button" id="cancelStatusUpdate" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+      function setupEditButtons() {
+        const editButtons = document.querySelectorAll('.edit-product');
+        editButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.getAttribute('data-product-id');
+                const productModal = document.getElementById('product-modal');
+                const modalTitle = document.getElementById('modal-title');
+                
+                // Lấy thông tin sản phẩm từ dòng hiện tại
+                const productRow = this.closest('tr');
+                
+                const productName = productRow.querySelector('td:nth-child(2)').textContent;
+                const category = productRow.querySelector('td:nth-child(3)').textContent;
+                const manufacturer = productRow.querySelector('td:nth-child(4)').textContent;
+                const price = productRow.querySelector('td:nth-child(5)').textContent;
+                const status = productRow.querySelector('td:nth-child(6) .badge').textContent.toLowerCase().trim();
+                const photos = productRow.querySelector('img').src;
+    
+                document.getElementById('product-id').value = productId;
+                document.getElementById('product-name').value = productName;
+                document.getElementById('product-category').value = category;
+                document.getElementById('product-manufacturer').value = manufacturer;
+                document.getElementById('product-price').value = price;
+                document.getElementById('product-status').value = status;
+                document.getElementById('product-photos').value = photos;
+    
+                // Cập nhật tiêu đề modal
+                modalTitle.textContent = 'Edit Product';
+    
+                // Hiển thị modal
+                productModal.style.display = 'block';
+    
+                // Preview ảnh
+                const previewPhotosContainer = document.getElementById('preview-photos');
+                previewPhotosContainer.innerHTML = ''; // Xóa preview cũ
+                
+                const img = document.createElement('img');
+                img.src = photos;
+                img.classList.add('preview-thumbnail');
+                previewPhotosContainer.appendChild(img);
+            });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const sortBySelect = document.getElementById('sort-by');
+        const sortOrderSelect = document.getElementById('sort-order');
+        const applyFilterBtn = document.getElementById("apply-filter");
+        const nameFilter = document.getElementById("name-filter");
+        const categoryFilter = document.getElementById("category-filter");
+        const manufacturerFilter = document.getElementById("manufacturer-filter");
+
+        // Xử lý sắp xếp
+        function applySorting() {
+          const sortBy = sortBySelect.value;
+          const sortOrder = sortOrderSelect.value;
+          
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set("sortBy", sortBy);
+          currentUrl.searchParams.set("sortOrder", sortOrder);
+
+          window.location.href = currentUrl.toString();
+        }
+
+        sortBySelect.addEventListener('change', applySorting);
+        sortOrderSelect.addEventListener('change', applySorting);
+
+        applyFilterBtn.addEventListener("click", function () {
+          const name = nameFilter.value.trim();
+          const category = categoryFilter.value.trim();
+          const manufacturer = manufacturerFilter.value.trim();
+
+          const queryParams = new URLSearchParams({
+            name: name,
+            category: category,
+            manufacturer: manufacturer,
+          }).toString();
+
+          window.location.href = `/api/products?${queryParams}`;
+        });
+        const addProductBtn = document.getElementById("add-product-btn");
+        const productModal = document.getElementById("product-modal");
+        const closeModalBtn = document.querySelector(".close-modal");
+        const productForm = document.getElementById("product-form");
+        const productPhotosInput = document.getElementById("product-photos");
+        const previewPhotosContainer = document.getElementById("preview-photos");
+
+        addProductBtn.addEventListener("click", function () {
+          productModal.style.display = "block";
+          productForm.reset();
+          previewPhotosContainer.innerHTML = '';
+        });
+
+        closeModalBtn.addEventListener("click", function () {
+          productModal.style.display = "none";
+        });
+
+        productForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const productId = document.getElementById('product-id').value;
+          const isEditing = !!productId;
+
+          const priceInput = document.getElementById('product-price');
+          const price = priceInput.value ? parseFloat(priceInput.value) : undefined;
+
+          const formData = {
+            product_id: isEditing ? productId : `PROD-${Date.now()}`, // Tự động sinh ID
+            product_name: document.getElementById('product-name').value,
+            category_id: document.getElementById('product-category').value,
+            manufacturer_id: document.getElementById('product-manufacturer').value,
+            description: document.getElementById('product-description').value,
+            status: document.getElementById('product-status').value,
+            price: price,
+            photos: productPhotosInput.value.split('\n').map(link => link.trim()).filter(link => /^https?:\/\/.+/.test(link))
+          };
+
+          try {
+            const url = isEditing ? `/api/products/${productId}` : "/api/products";
+            const method = isEditing ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+              method: method,
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              alert(isEditing ? "Product updated successfully!" : "Product added successfully!");
+              
+              productModal.style.display = "none";
+              
+              window.location.reload();
+            } else {
+              let errorMessage = result.message || "An error occurred";
+      
+              if (result.errors) {
+                errorMessage += "\n" + result.errors;
+              }
+              
+              alert(errorMessage);
+            }
+          } catch (error) {
+            console.error("Error adding product:", error);
+            alert("An error occurred while adding the product");
+          }
+        });
+
+        function setupDeleteButtons() {
+          const deleteButtons = document.querySelectorAll('.delete-product');
+          deleteButtons.forEach(button => {
+              button.addEventListener('click', function() {
+                  const productId = this.getAttribute('data-product-id');
+                  const updateStatusModal = document.getElementById('updateStatusModal');
+                  const modalProductId = document.getElementById('modalProductId');
+                  
+                  modalProductId.value = productId;
+                  updateStatusModal.style.display = 'block';
+              });
+          });
+        }
+    
+        setupDeleteButtons();
+    
+        const updateStatusForm = document.getElementById('updateStatusForm');
+        const updateStatusModal = document.getElementById('updateStatusModal');
+        const cancelStatusUpdateBtn = document.getElementById('cancelStatusUpdate');
+    
+        cancelStatusUpdateBtn.addEventListener('click', function() {
+            updateStatusModal.style.display = 'none';
+        });
+    
+        updateStatusForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('modalProductId').value;
+            const newStatus = document.getElementById('newStatus').value;
+
+            console.log('Product ID:', productId);
+            console.log('New Status:', newStatus);
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+    
+                const result = await response.json();
+    
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error updating product status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        });
+    
+        window.addEventListener('click', function(event) {
+            if (event.target === updateStatusModal) {
+                updateStatusModal.style.display = 'none';
+            }
+        });
+
+        setupEditButtons();
+      });
+
+      
+    </script>
+  </body>
+</html>

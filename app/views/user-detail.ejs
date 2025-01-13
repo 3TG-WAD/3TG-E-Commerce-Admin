@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>User Details</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link rel="stylesheet" href="/css/UserDetail.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('./components/sidebar', { currentPage: 'users' }) %>
+
+      <main class="dashboard-content">
+        <header class="dashboard-header">
+          <h1>User Details</h1>
+          <button class="btn btn-secondary" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
+        </header>
+
+        <section class="user-details-section">
+          <div class="user-card">
+            <div class="user-avatar-container">
+              <img
+                src="<%= user.avatar ? user.avatar : '/images/default-avatar.png' %>"
+                alt="<%= user.username %>"
+                class="user-avatar"
+              />
+            </div>
+            <div class="user-info">
+              <h2><%= user.username %></h2>
+              <p><strong>Email:</strong> <%= user.email %></p>
+              <p><strong>Role:</strong> <%= user.role %></p>
+              <p>
+                <strong>Status:</strong>
+                <span
+                  class="badge <%= user.is_active ? 'badge-success' : 'badge-danger' %>"
+                >
+                  <%= user.is_active ? 'Active' : 'Inactive' %>
+                </span>
+              </p>
+              <p>
+                <strong>Joined at:</strong> <%= new
+                Date(user.created_at).toLocaleDateString() %>
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
