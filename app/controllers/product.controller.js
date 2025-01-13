@@ -72,6 +72,82 @@ class ProductController {
     }
   }
 
+  // async createProduct(req, res) {
+  //   const session = await mongoose.startSession();
+  //   session.startTransaction();
+
+  //   try {
+  //     const {
+  //       product_name,
+  //       description,
+  //       category_id,
+  //       manufacturer_id,
+  //       specifications,
+  //       photos,
+  //       variants,
+  //     } = req.body;
+
+  //     // Tạo product
+  //     const newProduct = await ProductModel.create(
+  //       [
+  //         {
+  //           product_id: `PROD-${Date.now()}`,
+  //           product_name,
+  //           description,
+  //           category_id,
+  //           manufacturer_id,
+  //           creation_time: new Date(),
+  //           specifications,
+  //           photos,
+  //           variants: [], // Khởi tạo mảng variants rỗng
+  //         },
+  //       ],
+  //       { session }
+  //     );
+
+  //     // Tạo variants
+  //     if (variants && variants.length > 0) {
+  //       const productVariants = variants.map((variant) => ({
+  //         variant_id: `VAR-${Date.now()}-${Math.random()
+  //           .toString(36)
+  //           .substr(2, 9)}`,
+  //         product_id: newProduct[0].product_id,
+  //         color: variant.color,
+  //         material: variant.material,
+  //         price: variant.price,
+  //         discount: variant.discount || 0,
+  //         in_stock: variant.in_stock || 0,
+  //       }));
+
+  //       // Tạo variants
+  //       const createdVariants = await VariantModel.create(productVariants, {
+  //         session,
+  //       });
+
+  //       // Cập nhật variants cho product
+  //       await ProductModel.findOneAndUpdate(
+  //         { product_id: newProduct[0].product_id },
+  //         {
+  //           variants: createdVariants.map((variant) => variant.variant_id),
+  //         },
+  //         { session }
+  //       );
+  //     }
+
+  //     await session.commitTransaction();
+  //     session.endSession();
+
+  //     return ResponseHandler.success(res, {
+  //       product: newProduct[0],
+  //       variants: createdVariants,
+  //     });
+  //   } catch (error) {
+  //     await session.abortTransaction();
+  //     session.endSession();
+  //     return ResponseHandler.error(res, error);
+  //   }
+  // }
+
   async createProduct(req, res) {
     try {
       const productData = req.body;
@@ -90,6 +166,97 @@ class ProductController {
     }
   }
 
+  // async updateProduct(req, res) {
+  //   const session = await mongoose.startSession();
+  //   session.startTransaction();
+
+  //   try {
+  //     const { productId } = req.params;
+  //     const {
+  //       product_name,
+  //       description,
+  //       category_id,
+  //       manufacturer_id,
+  //       specifications,
+  //       photos,
+  //       variants,
+  //     } = req.body;
+
+  //     // Tìm product
+  //     const product = await ProductModel.findOne({
+  //       product_id: productId,
+  //     }).session(session);
+  //     if (!product) {
+  //       throw new Error("Product not found");
+  //     }
+
+  //     // Cập nhật thông tin product
+  //     product.product_name = product_name || product.product_name;
+  //     product.description = description || product.description;
+  //     product.category_id = category_id || product.category_id;
+  //     product.manufacturer_id = manufacturer_id || product.manufacturer_id;
+  //     product.specifications = specifications || product.specifications;
+  //     product.photos = photos || product.photos;
+
+  //     await product.save({ session });
+
+  //     // Cập nhật variants
+  //     if (variants && variants.length > 0) {
+  //       const variantUpdates = variants.map(async (variantData) => {
+  //         if (variantData.variant_id) {
+  //           // Cập nhật variant hiện tại
+  //           return VariantModel.findOneAndUpdate(
+  //             { variant_id: variantData.variant_id },
+  //             {
+  //               color: variantData.color,
+  //               material: variantData.material,
+  //               price: variantData.price,
+  //               discount: variantData.discount || 0,
+  //               in_stock: variantData.in_stock || 0,
+  //             },
+  //             { session }
+  //           );
+  //         } else {
+  //           // Tạo variant mới
+  //           return VariantModel.create(
+  //             [
+  //               {
+  //                 variant_id: `VAR-${Date.now()}-${Math.random()
+  //                   .toString(36)
+  //                   .substr(2, 9)}`,
+  //                 product_id: product.product_id,
+  //                 color: variantData.color,
+  //                 material: variantData.material,
+  //                 price: variantData.price,
+  //                 discount: variantData.discount || 0,
+  //                 in_stock: variantData.in_stock || 0,
+  //               },
+  //             ],
+  //             { session }
+  //           );
+  //         }
+  //       });
+
+  //       const createdVariants = await Promise.all(variantUpdates);
+
+  //       // Cập nhật mảng variants của product
+  //       product.variants = createdVariants.map(
+  //         (v) =>
+  //           v.variant_id || (Array.isArray(v) ? v[0].variant_id : v.variant_id)
+  //       );
+  //       await product.save({ session });
+  //     }
+
+  //     await session.commitTransaction();
+  //     session.endSession();
+
+  //     return ResponseHandler.success(res, { product });
+  //   } catch (error) {
+  //     await session.abortTransaction();
+  //     session.endSession();
+  //     return ResponseHandler.error(res, error);
+  //   }
+  // }
   async updateProduct(req, res) {
     try {
       const { productId } = req.params;

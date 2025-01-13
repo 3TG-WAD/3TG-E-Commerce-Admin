@@ -3,6 +3,86 @@ const OrderModel = require("../models/order.model");
 const moment = require("moment");
 
 class ReportController {
+  // async getRevenueReport(req, res) {
+  //   try {
+  //     const { startDate, endDate } = req.query;
+
+  //     let matchCondition = {};
+  //     if (startDate && endDate) {
+  //       const start = moment(startDate).startOf("day").toDate();
+  //       const end = moment(endDate).endOf("day").toDate();
+  //       matchCondition.createdAt = { $gte: start, $lte: end };
+  //     }
+
+  //     const report = await OrderModel.aggregate([
+  //       {
+  //         $match: matchCondition,
+  //       },
+  //       {
+  //         $group: {
+  //           _id: null,
+  //           totalRevenue: { $sum: "$total_amount" },
+  //         },
+  //       },
+  //     ]);
+
+  //     const totalRevenue = report.length > 0 ? report[0].totalRevenue : 0;
+  //     return totalRevenue; // Trả về dữ liệu trực tiếp
+  //   } catch (error) {
+  //     throw error; // Ném lỗi để xử lý ở hàm gọi
+  //   }
+  // }
+
+  // async getTopRevenueProducts(req, res) {
+  //   try {
+  //     const { startDate, endDate } = req.query;
+
+  //     let matchCondition = {};
+  //     if (startDate && endDate) {
+  //       const start = moment(startDate).startOf("day").toDate();
+  //       const end = moment(endDate).endOf("day").toDate();
+  //       matchCondition.createdAt = { $gte: start, $lte: end };
+  //     }
+
+  //     const report = await OrderModel.aggregate([
+  //       {
+  //         $match: matchCondition,
+  //       },
+  //       { $unwind: "$order_details" },
+  //       {
+  //         $lookup: {
+  //           from: "products",
+  //           localField: "order_details.product_id",
+  //           foreignField: "_id",
+  //           as: "product",
+  //         },
+  //       },
+  //       { $unwind: "$product" },
+  //       {
+  //         $group: {
+  //           _id: "$order_details.product_id",
+  //           product_name: { $first: "$product.product_name" },
+  //           totalRevenue: {
+  //             $sum: {
+  //               $multiply: [
+  //                 "$order_details.price_at_purchase",
+  //                 "$order_details.quantity",
+  //               ],
+  //             },
+  //           },
+  //           totalSold: { $sum: "$order_details.quantity" },
+  //         },
+  //       },
+  //       { $sort: { totalRevenue: -1 } },
+  //       { $limit: 10 },
+  //     ]);
+
+  //     return report;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+
   async getRevenueReport(req, res) {
     try {
       const { startDate, endDate } = req.query;
@@ -11,7 +91,7 @@ class ReportController {
       if (startDate && endDate) {
         const start = moment(startDate).startOf("day").toDate();
         const end = moment(endDate).endOf("day").toDate();
-        matchCondition.createdAt = { $gte: start, $lte: end };
+        matchCondition.created_at = { $gte: start, $lte: end };
       }
 
       const report = await OrderModel.aggregate([
@@ -27,9 +107,9 @@ class ReportController {
       ]);
 
       const totalRevenue = report.length > 0 ? report[0].totalRevenue : 0;
-      return totalRevenue; // Trả về dữ liệu trực tiếp
+      return totalRevenue;
     } catch (error) {
-      throw error; // Ném lỗi để xử lý ở hàm gọi
+      throw error;
     }
   }
 
@@ -41,36 +121,33 @@ class ReportController {
       if (startDate && endDate) {
         const start = moment(startDate).startOf("day").toDate();
         const end = moment(endDate).endOf("day").toDate();
-        matchCondition.createdAt = { $gte: start, $lte: end };
+        matchCondition.created_at = { $gte: start, $lte: end };
       }
 
       const report = await OrderModel.aggregate([
         {
           $match: matchCondition,
         },
-        { $unwind: "$order_details" },
+        { $unwind: "$items" }, // Thay đổi từ $unwind: "$order_details"
         {
           $lookup: {
-            from: "products",
-            localField: "order_details.product_id",
-            foreignField: "_id",
+            from: "products", // Đảm bảo collection name đúng
+            localField: "items.product_id",
+            foreignField: "product_id", // Khớp với field trong collection products
             as: "product",
           },
         },
         { $unwind: "$product" },
         {
           $group: {
-            _id: "$order_details.product_id",
+            _id: "$items.product_id",
             product_name: { $first: "$product.product_name" },
             totalRevenue: {
               $sum: {
-                $multiply: [
-                  "$order_details.price_at_purchase",
-                  "$order_details.quantity",
-                ],
+                $multiply: ["$items.price", "$items.quantity"],
               },
             },
-            totalSold: { $sum: "$order_details.quantity" },
+            totalSold: { $sum: "$items.quantity" },
           },
         },
         { $sort: { totalRevenue: -1 } },

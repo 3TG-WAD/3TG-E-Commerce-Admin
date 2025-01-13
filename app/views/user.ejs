@@ -89,8 +89,8 @@
                 <td><%= user.email %></td>
                 <td><%= user.role %></td>
                 <td>
-                  <span class="badge <%= user.is_active ? 'badge-success' : 'badge-danger' %>">
-                    <%= user.is_active ? 'Active' : 'Inactive' %>
+                  <span class="badge <%= user.isActive ? 'badge-success' : 'badge-danger' %>">
+                    <%= user.isActive ? 'Active' : 'Inactive' %>
                   </span>
                 </td>
                 <td>
@@ -228,7 +228,7 @@
               const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
               const statusBadge = userRow.querySelector('.badge');
               
-              if (result.data.is_active) {
+              if (result.data.isActive) {
                 statusBadge.textContent = 'Active';
                 statusBadge.classList.remove('badge-danger');
                 statusBadge.classList.add('badge-success');

@@ -15,11 +15,7 @@ class OrderController {
         page: parseInt(page),
         limit: parseInt(limit),
         sort: { createdAt: -1 },
-        populate: [
-          { path: "user_id", select: "username" },
-          { path: "order_details.product_id", select: "product_name" },
-          { path: "order_details.variant_id", select: "color" },
-        ],
+        populate: [{ path: "user_id", select: "username" }],
       };
 
       const isAjaxRequest =
@@ -39,10 +35,11 @@ class OrderController {
               buyer: order.buyer,
               total_amount: order.total_amount,
               status: order.status,
-              order_details: order.order_details.map((detail) => ({
-                product_name: detail.product_id.product_name,
-                variant_color: detail.variant_id.color,
-                quantity: detail.quantity,
+              items: order.items.map((item) => ({
+                product_name: item.product_name,
+                color: item.color,
+                price: item.price,
+                quantity: item.quantity,
               })),
             })),
             pagination: {
@@ -102,17 +99,12 @@ class OrderController {
   }
 
   async renderOrderPage(req, res) {
-    console.log("Bắt đầu render dashboard");
     try {
-      console.log("Bắt đầu render dashboard");
-
       const totalOrders = await OrderModel.countDocuments();
-      console.log("Tổng số đơn hàng:", totalOrders);
 
       const totalRevenue = await OrderModel.aggregate([
         { $group: { _id: null, total: { $sum: "$total_amount" } } },
       ]);
-      console.log("Tổng doanh thu:", totalRevenue);
 
       const { page = 1, status } = req.query;
 
@@ -125,11 +117,7 @@ class OrderController {
         page: Number(page),
         limit: 10,
         sort: { createdAt: -1 },
-        populate: [
-          "user_id",
-          "order_details.product_id",
-          "order_details.variant_id",
-        ],
+        populate: ["user_id"],
       };
 
       const recentOrders = await new Promise((resolve, reject) => {
@@ -145,7 +133,6 @@ class OrderController {
       });
 
       if (!recentOrders || recentOrders.docs.length === 0) {
-        console.warn("Cannot find order");
         return res.render("dashboard", {
           totalOrders: 0,
           totalRevenue: 0,
@@ -214,7 +201,13 @@ class OrderController {
       }
 
       // Validate trạng thái
-      const validStatuses = ["Pending", "Shipped", "Delivered", "Cancelled"];
+      const validStatuses = [
+        "pending",
+        "processing",
+        "shipping",
+        "completed",
+        "cancelled",
+      ];
 
       if (!validStatuses.includes(status)) {
         return ResponseHandler.badRequest(res, "Trạng thái không hợp lệ");
@@ -240,12 +233,8 @@ class OrderController {
           select: "username email phone",
         })
         .populate({
-          path: "order_details.product_id",
+          path: "items.product_id",
           select: "product_name product_code",
-        })
-        .populate({
-          path: "order_details.variant_id",
-          select: "color size price",
         });
 
       if (!order) {

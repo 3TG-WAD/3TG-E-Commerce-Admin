@@ -47,7 +47,7 @@ class UserController {
               email: user.email,
               role: user.role,
               avatar: user.avatar || "/images/default-avatar.png",
-              is_active: user.is_active,
+              is_active: user.isActive,
             })),
             pagination: {
               currentPage: users.page,
@@ -126,8 +126,8 @@ class UserController {
         return ResponseHandler.error(res, "User not found");
       }
 
-      user.is_active = !user.is_active;
-      await user.save();
+      user.isActive = !user.isActive;
+      await user.save({ validateBeforeSave: false });
 
       return ResponseHandler.success(res, user);
     } catch (error) {

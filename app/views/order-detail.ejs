@@ -116,8 +116,7 @@
 
           <div class="order-info">
             <div>
-              <strong>Customer:</strong> <%= order.buyer.Name %><br />
-              <strong>Phone:</strong> <%= order.buyer.Phone %>
+              <strong>Customer:</strong> <%= order.user_id.username %><br />
             </div>
             <div>
               <strong>Status:</strong>
@@ -145,26 +144,17 @@
               </tr>
             </thead>
             <tbody>
-              <% order.order_details.forEach(function(detail) { %>
+              <% order.items.forEach(function(item) { %>
               <tr>
-                <td><%= detail.product_id.product_name %></td>
-                <td>
-                  <%= detail.variant_id.color %>, <%= detail.variant_id.size %>
-                </td>
-                <td><%= detail.quantity %></td>
-                <td><%= formatCurrency(detail.price_at_purchase) %></td>
-                <td>
-                  <%= formatCurrency(detail.quantity * detail.price_at_purchase)
-                  %>
-                </td>
+                <td><%= item.product_name %></td>
+                <td><%= item.color %>, <%= item.size %></td>
+                <td><%= item.quantity %></td>
+                <td><%= formatCurrency(item.price) %></td>
+                <td><%= formatCurrency(item.quantity * item.price) %></td>
               </tr>
               <% }); %>
             </tbody>
             <tfoot>
-              <tr>
-                <td colspan="4"><strong>Shipping Cost:</strong></td>
-                <td><%= formatCurrency(order.order_shipping_cost) %></td>
-              </tr>
               <tr>
                 <td colspan="4"><strong>Total Amount:</strong></td>
                 <td><%= formatCurrency(order.total_amount) %></td>

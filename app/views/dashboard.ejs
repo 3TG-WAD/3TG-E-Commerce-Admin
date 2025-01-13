@@ -35,11 +35,11 @@
             <div class="filter-section">
               <select id="status-filter">
                 <option value="">All status</option>
-                <option value="Pending">Pending</option>
-                <option value="Processing">Processing</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Delivered">Delivered</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipping">Shipping</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
               </select>
               <button id="apply-status-filter" class="btn-apply-filter">
                 <i class="fas fa-filter"></i> Filter
@@ -49,12 +49,12 @@
             <table class="table" id="order-table">
               <thead>
                 <tr>
-                  <th>Mã Đơn</th>
-                  <th>Khách Hàng</th>
-                  <th>Sản Phẩm</th>
-                  <th>Tổng Tiền</th>
-                  <th>Trạng Thái</th>
-                  <th>Hành Động</th>
+                  <th>Order Id</th>
+                  <th>Customer</th>
+                  <th>Product</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -63,9 +63,8 @@
                   <td><%= order.order_id %></td>
                   <td><%= order.user_id.username %></td>
                   <td>
-                    <% order.order_details.forEach(function(detail) { %> <%=
-                    detail.product_id.product_name %> (<%=
-                    detail.variant_id.color %>)<br />
+                    <% order.items.forEach(function(item) { %> <%=
+                    item.product_name %><br />
                     <% }); %>
                   </td>
                   <td><%= formatCurrency(order.total_amount) %></td>
@@ -75,7 +74,7 @@
                     </span>
                   </td>
                   <td>
-                    <a href="#!" class="btn btn-sm btn-info"> Chi Tiết </a>
+                    <a href="#!" class="btn btn-sm btn-info"> Detail </a>
                   </td>
                 </tr>
                 <% }); %>
