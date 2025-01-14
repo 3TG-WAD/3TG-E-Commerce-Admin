@@ -1,70 +1,133 @@
+const { response } = require("express");
 const ResponseHandler = require("../common/responseHandler");
 const UserModel = require("../models/user.model");
 
 class UserController {
-  // Danh sách người dùng với filter và phân trang
-  async getUserList(req, res) {
+  async getUserListUI(req, res) {
     try {
       const {
         page = 1,
         limit = 10,
         username,
         email,
+        role,
         sortBy = "createdAt",
-        sortOrder = "asc", // Mặc định là tăng dần
+        sortOrder = "asc",
       } = req.query;
 
       const filter = {};
+
       if (username) filter.username = { $regex: username, $options: "i" };
       if (email) filter.email = { $regex: email, $options: "i" };
+      if (role) filter.role = { $regex: role, $options: "i" };
 
-      console.log("Filter: ", filter);
-
-      // Xác định thứ tự sắp xếp
       const order = sortOrder.toLowerCase() === "desc" ? -1 : 1;
 
-      // Thực hiện phân trang và sắp xếp
-      const users = await UserModel.paginate(filter, {
-        page,
-        limit,
+      const options = {
+        page: parseInt(page),
+        limit: parseInt(limit),
         sort: { [sortBy]: order },
-        select: "-password", // Không trả về password
-      });
+        select: "-password",
+      };
 
-      return ResponseHandler.success(res, users);
+      const isAjaxRequest =
+        req.xhr ||
+        req.headers.accept.indexOf("application/json") > -1 ||
+        req.get("X-Requested-With") === "XMLHttpRequest";
+
+      const users = await UserModel.paginate(filter, options);
+
+      if (isAjaxRequest) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            users: users.docs.map((user) => ({
+              _id: user._id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              avatar: user.avatar || "/images/default-avatar.png",
+              is_active: user.isActive,
+            })),
+            pagination: {
+              currentPage: users.page,
+              totalPages: users.totalPages,
+              totalUsers: users.totalDocs,
+            },
+            filters: {
+              username: username || "",
+              email: email || "",
+              role: role || "",
+              sortBy: sortBy,
+              sortOrder: sortOrder,
+            },
+          },
+        });
+      }
+
+      res.render("user", {
+        users: users.docs || [],
+        totalPages: users.totalPages || 1,
+        currentPage: users.page || 1,
+
+        currentUsername: username,
+        currentEmail: email,
+        currentRole: role,
+        currentSortBy: sortBy,
+        currentSortOrder: sortOrder,
+      });
     } catch (error) {
-      return ResponseHandler.error(res, error);
+      console.error("Error fetching user list:", error);
+
+      const isAjaxRequest =
+        req.xhr ||
+        req.headers.accept.indexOf("application/json") > -1 ||
+        req.get("X-Requested-With") === "XMLHttpRequest";
+
+      if (isAjaxRequest) {
+        return res.status(500).json({
+          success: false,
+          message: "Error fetching user list",
+          error: error.message,
+        });
+      }
+
+      try {
+        res.status(500).render("500", {
+          message: "System Error",
+          error: error.message,
+        });
+      } catch (renderError) {
+        res.status(500).json({
+          message: "System Error",
+          error: error.message,
+        });
+      }
     }
   }
 
-  // Chi tiết người dùng
   async getUserDetails(req, res) {
     try {
       const { userId } = req.params;
-      const user = await UserModel.findOne({
-        user_id: userId, // Sử dụng user_id thay vì UserID
-      }).select("-password"); // Không trả về password
-      return ResponseHandler.success(res, user);
+      const user = await UserModel.findById(userId).select("-password");
+
+      res.render("user-detail", { user });
     } catch (error) {
       return ResponseHandler.error(res, error);
     }
   }
 
-  // Khóa/mở khóa tài khoản
   async toggleUserStatus(req, res) {
     try {
       const { userId } = req.params;
-      const user = await UserModel.findOne({
-        user_id: userId, // Sử dụng user_id thay vì UserID
-      }).select("-password"); // Không trả về password
+      const user = await UserModel.findById(userId).select("-password");
 
       if (!user) {
         return ResponseHandler.error(res, "User not found");
       }
 
-      // Tắt/mở khóa tài khoản
-      user.is_active = !user.is_active; // Sử dụng is_active thay vì isActive
-      await user.save();
+      user.isActive = !user.isActive;
+      await user.save({ validateBeforeSave: false });
 
       return ResponseHandler.success(res, user);
     } catch (error) {

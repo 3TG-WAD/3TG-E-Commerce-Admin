@@ -3,70 +3,46 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 
 const OrderSchema = new mongoose.Schema(
   {
-    OrderID: {
+    order_id: {
       type: String,
       required: true,
       unique: true,
     },
-    UserID: {
+    user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    Buyer: {
-      Name: {
-        type: String,
-        required: true,
+    items: [
+      {
+        product_id: String,
+        variant_id: String,
+        product_name: String,
+        product_image: String,
+        color: String,
+        size: String,
+        quantity: Number,
+        price: Number,
+        discount: Number,
       },
-      Phone: {
-        type: String,
-        required: true,
-      },
-    },
-    TotalAmount: {
+    ],
+    total_amount: {
       type: Number,
       required: true,
       min: 0,
     },
-    OrderDetails: [
-      {
-        ProductID: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-        VariantID: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Variant",
-          required: true,
-        },
-        Quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-        PriceAtPurchase: {
-          type: Number,
-          required: true,
-          min: 0,
-        },
-      },
-    ],
-    Status: {
+    status: {
       type: String,
-      enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
+      enum: ["pending", "processing", "shipping", "completed", "cancelled"],
       default: "Pending",
     },
-    OrderAddress: {
-      Street: String,
-      City: String,
-      Country: String,
-      PostalCode: String,
+    shipping_address: {
+      type: String,
+      required: true,
     },
-    OrderShippingCost: {
-      type: Number,
-      default: 0,
-      min: 0,
+    created_at: {
+      type: Date,
+      default: Date.now,
     },
   },
   {
@@ -75,17 +51,5 @@ const OrderSchema = new mongoose.Schema(
 );
 
 OrderSchema.plugin(mongoosePaginate);
-
-OrderSchema.methods.updateStatus = function (newStatus) {
-  this.Status = newStatus;
-  return this.save();
-};
-
-OrderSchema.methods.calculateTotalAmount = function () {
-  return this.OrderDetails.reduce(
-    (total, item) => total + item.Quantity * item.PriceAtPurchase,
-    this.OrderShippingCost
-  );
-};
 
 module.exports = mongoose.model("Order", OrderSchema);

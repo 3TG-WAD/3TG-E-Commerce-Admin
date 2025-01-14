@@ -3,41 +3,41 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 
 const VariantSchema = new mongoose.Schema(
   {
-    VariantID: {
+    variant_id: {
       type: String,
       required: true,
       unique: true,
     },
-    ProductID: {
+    product_id: {
       type: String,
       ref: "Product",
       required: true,
     },
-    Color: {
+    color: {
       type: String,
       trim: true,
     },
-    Material: {
+    material: {
       type: String,
       trim: true,
     },
-    Price: {
+    price: {
       type: Number,
       required: true,
       min: 0,
     },
-    Discount: {
+    discount: {
       type: Number,
+      required: true,
       default: 0,
-      min: 0,
-      max: 100,
     },
-    IsAvailable: {
+    is_available: {
       type: Boolean,
       default: true,
     },
-    InStock: {
+    in_stock: {
       type: Number,
+      required: true,
       default: 0,
       min: 0,
     },
