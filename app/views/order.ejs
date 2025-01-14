@@ -5,271 +5,195 @@
     <meta charset="UTF-8" />
     <title>Order Management</title>
     <link rel="stylesheet" href="/css/Sidebar.css" />
-    <link rel="stylesheet" href="/css/Order.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
-    <style>
-      .dashboard-container {
-        display: flex;
-    }
-    
-    .dashboard-content {
-        flex-grow: 1;
-        padding: 20px;
-        margin-left: 250px; /* Bằng chiều rộng sidebar mặc định */
-        width: calc(100% - 250px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 1400px;
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-content {
-            margin-left: 0;
-            width: 100%;
-        }
-    }
-
-      .order-filters {
-        width: 100%;
-        max-width: 1000px;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      .order-table-section {
-        width: 100%;
-        max-width: 1400px;
-        overflow-x: auto;
-      }
-
-      .order-table {
-        width: 100%;
-        margin: 0 auto;
-      }
-
-      .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        gap: 10px;
-      }
-
-      .pagination a {
-        padding: 5px 10px;
-        border: 1px solid #ddd;
-        text-decoration: none;
-        color: #333;
-      }
-
-      .pagination a.active {
-        background-color: #007bff;
-        color: white;
-      }
-
-      .modal {
-          display: none;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0,0,0,0.5);
-      }
-
-      .modal-content {
-          background-color: white;
-          width: 300px;
-          margin: 100px auto;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <%- include('./components/sidebar', { currentPage: 'orders' }) %>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <%- include('./components/sidebar', { currentPage: 'orders' }) %>
+            </div>
+            <div class="col-md-10">
+                <div class="container-fluid p-4">
+                    <h1 class="mb-4">Order Management</h1>
 
-        <main class="dashboard-content">
-            <header class="dashboard-header">
-                <h1>Order Management</h1>
-            </header>
-
-            <section class="order-filters">
-                <select id="status-filter" class="form-control">
-                    <option value="">All Status</option>
-                    <option value="pending" <%= currentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-                    <option value="processing" <%= currentStatus === 'processing' ? 'selected' : '' %>>Pending</option>
-                    <option value="shipping" <%= currentStatus === 'shipping' ? 'selected' : '' %>>Shipped</option>
-                    <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>Delivered</option>
-                    <option value="cancelled" <%= currentStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-                </select>
-                <button id="apply-status-filter" class="btn btn-secondary">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-            </section>
-
-            <section class="order-table-section">
-                <table class="table order-table" id="order-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Products</th>
-                            <th>Total Amount</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% orders.forEach(function(order) { %>
-                        <tr>
-                            <td><%= order.order_id %></td>
-                            <td><%= order.user_id.username %></td>
-                            <td>
-                                <% order.items.forEach(function(item) { %>
-                                    <%= item.product_name %> 
-                                    (Qty: <%= item.quantity %>)<br />
-                                <% }); %>
-                            </td>
-                            <td><%= formatCurrency(order.total_amount) %></td>
-                            <td>
-                                <span class="badge <%= getStatusClass(order.status) %>">
-                                    <%= order.status %>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a 
-                                        href="/api/orders/<%= order.order_id %>" 
-                                        class="btn btn-sm btn-info"
-                                    >
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <button 
-                                        class="btn btn-sm btn-warning update-status"
-                                        data-order-id="<%= order.order_id %>"
-                                    >
-                                        <i class="fas fa-edit"></i>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <select id="status-filter" class="form-select">
+                                        <option value="">All Status</option>
+                                        <option value="pending" <%= currentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="processing" <%= currentStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+                                        <option value="shipping" <%= currentStatus === 'shipping' ? 'selected' : '' %>>Shipping</option>
+                                        <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>Completed</option>
+                                        <option value="cancelled" <%= currentStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button id="apply-status-filter" class="btn btn-dark w-100">
+                                        <i class="fas fa-filter"></i> Filter
                                     </button>
                                 </div>
-                            </td>
-                        </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </section>
+                            </div>
+                        </div>
+                    </div>
 
-            <section class="pagination">
-                <% for(let i = 1; i <= totalPages; i++) { %>
-                <a
-                    href="?page=<%= i %>&status=<%= currentStatus || '' %>"
-                    class="<%= currentPage === i ? 'active' : '' %>"
-                >
-                    <%= i %>
-                </a>
-                <% } %>
-            </section>
-        </main>
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Products</th>
+                                        <th>Total Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% orders.forEach(function(order) { %>
+                                    <tr>
+                                        <td><%= order.order_id %></td>
+                                        <td><%= order.user_id.username %></td>
+                                        <td>
+                                            <% order.items.forEach(function(item) { %>
+                                                <%= item.product_name %> 
+                                                (Qty: <%= item.quantity %>)<br />
+                                            <% }); %>
+                                        </td>
+                                        <td><%= formatCurrency(order.total_amount) %></td>
+                                        <td>
+                                            <span class="badge <%= getStatusClass(order.status) %>">
+                                                <%= order.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a 
+                                                    href="/api/orders/<%= order.order_id %>" 
+                                                    class="btn btn-sm btn-dark"
+                                                >
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button 
+                                                    class="btn btn-sm btn-outline-dark update-status"
+                                                    data-order-id="<%= order.order_id %>"
+                                                >
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-        <div id="updateStatusModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-          <div class="modal-content" style="background-color: white; width: 300px; margin: 100px auto; padding: 20px; border-radius: 8px;">
-              <h2>Update Order Status</h2>
-              <form id="updateStatusForm">
-                  <input type="hidden" id="modalOrderId" name="orderId">
-                  <div class="form-group">
-                      <label for="newStatus">Select New Status:</label>
-                      <select id="newStatus" class="form-control">
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipping">Shipping</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                      </select>
-                  </div>
-                  <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between;">
-                      <button type="button" id="cancelStatusUpdate" class="btn btn-secondary">Cancel</button>
-                      <button type="submit" class="btn btn-primary">Update</button>
-                  </div>
-              </form>
-          </div>
-      </div>
+                    <nav aria-label="Page navigation" class="d-flex justify-content-center mt-3">
+                        <ul class="pagination">
+                            <% for(let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a
+                                    class="page-link <%= currentPage === i ? 'bg-dark text-white' : '' %>" 
+                                    href="?page=<%= i %>&status=<%= currentStatus || '' %>"
+                                >
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+
+                    <!-- Modal Update Status -->
+                    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Update Order Status</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="updateStatusForm">
+                                        <input type="hidden" id="modalOrderId" name="orderId">
+                                        <div class="mb-3">
+                                            <label for="newStatus" class="form-label">Select New Status:</label>
+                                            <select id="newStatus" class="form-select">
+                                                <option value="pending">Pending</option>
+                                                <option value="processing">Processing</option>
+                                                <option value="shipping">Shipping</option>
+                                                <option value="completed">Completed</option>
+                                                <option value="cancelled">Cancelled</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="/js/orders.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const statusFilter = document.getElementById("status-filter");
-        const applyFilterBtn = document.getElementById("apply-status-filter");
-    
-        // Script cũ về filter
-        applyFilterBtn.addEventListener("click", function () {
-            const selectedStatus = statusFilter.value;
-            window.location.href = `?status=${selectedStatus}`;
-        });
-    
-        // Script mới về update status
-        const updateStatusModal = document.getElementById('updateStatusModal');
-        const modalOrderId = document.getElementById('modalOrderId');
-        const newStatusSelect = document.getElementById('newStatus');
-        const updateStatusForm = document.getElementById('updateStatusForm');
-        const cancelStatusUpdateBtn = document.getElementById('cancelStatusUpdate');
-    
-        // Sự kiện mở modal
-        document.querySelectorAll('.update-status').forEach(button => {
-            button.addEventListener('click', function() {
-                const orderId = this.getAttribute('data-order-id');
-                modalOrderId.value = orderId;
-                updateStatusModal.style.display = 'block';
+        document.addEventListener("DOMContentLoaded", function () {
+            const statusFilter = document.getElementById("status-filter");
+            const applyFilterBtn = document.getElementById("apply-status-filter");
+            const updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+            const modalOrderId = document.getElementById('modalOrderId');
+            const newStatusSelect = document.getElementById('newStatus');
+            const confirmStatusUpdateBtn = document.getElementById('confirmStatusUpdate');
+        
+            applyFilterBtn.addEventListener("click", function () {
+                const selectedStatus = statusFilter.value;
+                window.location.href = `?status=${selectedStatus}`;
+            });
+        
+            document.querySelectorAll('.update-status').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    modalOrderId.value = orderId;
+                    updateStatusModal.show();
+                });
+            });
+        
+            confirmStatusUpdateBtn.addEventListener('click', function() {
+                const orderId = modalOrderId.value;
+                const newStatus = newStatusSelect.value;
+                
+                fetch(`/api/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra');
+                });
             });
         });
-    
-        // Sự kiện đóng modal
-        cancelStatusUpdateBtn.addEventListener('click', function() {
-            updateStatusModal.style.display = 'none';
-        });
-    
-        // Sự kiện submit form cập nhật trạng thái
-        updateStatusForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const orderId = modalOrderId.value;
-            const newStatus = newStatusSelect.value;
-            
-            fetch(`/api/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    location.reload();
-                } else {
-                    alert(result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra');
-            });
-        });
-    
-        // Đóng modal khi click ngoài
-        window.addEventListener('click', function(event) {
-            if (event.target === updateStatusModal) {
-                updateStatusModal.style.display = 'none';
-            }
-        });
-    });
     </script>
 </body>
 </html>
