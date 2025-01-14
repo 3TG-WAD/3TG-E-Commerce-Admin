@@ -28,9 +28,8 @@ const VariantSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
+      required: true,
       default: 0,
-      min: 0,
-      max: 100,
     },
     is_available: {
       type: Boolean,
@@ -38,6 +37,7 @@ const VariantSchema = new mongoose.Schema(
     },
     in_stock: {
       type: Number,
+      required: true,
       default: 0,
       min: 0,
     },

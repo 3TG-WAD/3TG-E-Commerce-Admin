@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Product List</title>
+    <link rel="stylesheet" href="/css/Sidebar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <%- include('../components/sidebar', { currentPage: 'products' }) %>
+
+      <main class="dashboard-content">
+        <div class="row">
+          <div class="col-12">
+            <h1 class="mb-4">Product List</h1>
+            <div class="row mb-3">
+              <div class="col-md-2">
+                <select id="categoryFilter" class="form-control">
+                  <option value="">categories</option>
+                  <% categories.forEach(category => { %>
+                  <option value="<%= category %>"><%= category %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <select id="manufacturerFilter" class="form-control">
+                  <option value="">Manufacturers</option>
+                  <% manufacturers.forEach(manufacturer => { %>
+                  <option value="<%= manufacturer %>">
+                    <%= manufacturer %>
+                  </option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <input
+                  type="text"
+                  id="productNameSearch"
+                  class="form-control"
+                  placeholder="Find by product name"
+                />
+              </div>
+              <div class="col-md-2">
+                <select id="sortSelect" class="form-control">
+                  <option value="creation_time_desc">Newest</option>
+                  <option value="creation_time_asc">Oldest</option>
+                  <option value="price_asc">Price low to high</option>
+                  <option value="price_desc">Price high to low</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <button id="filterButton" class="btn btn-black">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <button id="resetFilterButton" class="btn btn-outline-black">
+                  <i class="fas fa-redo"></i> Reset
+                </button>
+              </div>
+            </div>
+
+            <a href="/api/variants/create" class="btn btn-black mb-3">
+              <i class="fas fa-plus"></i> Add a new product
+            </a>
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Product Id</th>
+                  <th>Product name</th>
+                  <th>Manufacturer</th>
+                  <th>Creation date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody">
+                <% products.forEach(product => { %>
+                <tr>
+                  <td><%= product.product_id %></td>
+                  <td><%= product.product_name %></td>
+                  <td><%= product.manufacturer_id %></td>
+                  <td>
+                    <%= new Date(product.creation_time).toLocaleDateString() %>
+                  </td>
+                  <td>
+                    <div class="btn-group">
+                      <a
+                        href="/api/variants/detail/<%= product.product_id %>"
+                        class="btn btn-sm btn-dark"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a
+                        href="/api/variants/edit/<%= product.product_id %>"
+                        class="btn btn-sm btn-outline-dark"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+
+            <!-- Phân Trang -->
+            <nav>
+              <ul id="paginationContainer" class="pagination">
+                <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+                <li
+                  class="page-item <%= i === pagination.currentPage ? 'active' : '' %>"
+                >
+                  <a class="page-link" href="#" data-page="<%= i %>"
+                    ><%= i %></a
+                  >
+                </li>
+                <% } %>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script>
+      const pagination = {
+        currentPage: <%= JSON.stringify(pagination.currentPage) %>,
+        totalPages: <%= JSON.stringify(pagination.totalPages) %>
+      };
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        // Khởi tạo trạng thái ban đầu
+        let filterState = {
+          category: "",
+          manufacturer: "",
+          productName: "",
+          sort: "creation_time_desc",
+          page: pagination.currentPage || 1,
+        };
+
+        // Cập nhật các input ban đầu
+        if (filterState.category) {
+          document.getElementById("categoryFilter").value =
+            filterState.category;
+        }
+        if (filterState.manufacturer) {
+          document.getElementById("manufacturerFilter").value =
+            filterState.manufacturer;
+        }
+        if (filterState.sort) {
+          document.getElementById("sortSelect").value = filterState.sort;
+        }
+
+        // Hàm fetch sản phẩm
+        function fetchProducts() {
+          const url = new URL("/api/variants", window.location.origin);
+
+          // Thêm các tham số query
+          Object.keys(filterState).forEach((key) => {
+            if (filterState[key]) {
+              url.searchParams.append(key, filterState[key]);
+            }
+          });
+
+          console.log("Fetching URL:", url.toString());
+
+          fetch(url, {
+            headers: {
+              Accept: "application/json",
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              updateTable(data.products);
+              updatePagination(data.totalPages, data.currentPage);
+
+              // Tạo URL mới với tất cả các query params
+              const queryParams = new URLSearchParams();
+              queryParams.set("page", data.currentPage);
+
+              if (filterState.category) {
+                queryParams.set("category", filterState.category);
+              }
+
+              if (filterState.manufacturer) {
+                queryParams.set("manufacturer", filterState.manufacturer);
+              }
+
+              if (filterState.sort) {
+                queryParams.set("sort", filterState.sort);
+              }
+
+              // Cập nhật URL
+              const newUrl = `${
+                window.location.pathname
+              }?${queryParams.toString()}`;
+              window.history.pushState({}, "", newUrl);
+            })
+            .catch((error) => {
+              console.error("Fetch Error:", error);
+              alert("Error loading data, try again");
+            });
+        }
+
+        // Nút filter
+        document
+          .getElementById("filterButton")
+          .addEventListener("click", function () {
+            filterState.category =
+              document.getElementById("categoryFilter").value;
+            filterState.manufacturer =
+              document.getElementById("manufacturerFilter").value;
+            filterState.productName =
+              document.getElementById("productNameSearch").value;
+            filterState.sort = document.getElementById("sortSelect").value;
+            filterState.page = 1;
+            fetchProducts();
+          });
+
+        // Nút reset
+        document
+          .getElementById("resetFilterButton")
+          .addEventListener("click", function () {
+            // Reset các input
+            document.getElementById("categoryFilter").selectedIndex = 0;
+            document.getElementById("manufacturerFilter").selectedIndex = 0;
+            document.getElementById("productNameSearch").value = "";
+            document.getElementById("sortSelect").selectedIndex = 0;
+
+            // Reset trạng thái
+            filterState = {
+              category: "",
+              manufacturer: "",
+              productName: "",
+              sort: "creation_time_desc",
+              page: 1,
+            };
+
+            fetchProducts();
+          });
+
+        // Cập nhật bảng
+        function updateTable(products) {
+          const tbody = document.getElementById("productTableBody");
+          tbody.innerHTML = products
+            .map(
+              (product) => `
+                  <tr>
+                    <td>${product.product_id}</td>
+                    <td>${product.product_name}</td>
+                    <td>${product.manufacturer_id}</td>
+                    <td>${new Date(
+                      product.creation_time
+                    ).toLocaleDateString()}</td>
+                    <td>
+                      <div class="btn-group">
+                        <a href="/api/variants/detail/${
+                          product.product_id
+                        }" class="btn btn-sm btn-dark">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/api/variants/edit/${
+                          product.product_id
+                        }" class="btn btn-sm btn-outline-dark">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                `
+            )
+            .join("");
+        }
+
+        // Cập nhật phân trang
+        function updatePagination(totalPages, currentPage) {
+          const paginationContainer = document.getElementById(
+            "paginationContainer"
+          );
+          paginationContainer.innerHTML = Array.from(
+            { length: totalPages },
+            (_, i) => `
+                  <li class="page-item ${
+                    i + 1 === currentPage ? "active" : ""
+                  }">
+                    <a
+                      class="page-link"
+                      href="?page=${i + 1}"
+                      data-page="${i + 1}"
+                    >
+                      ${i + 1}
+                    </a>
+                  </li>
+                `
+          ).join("");
+
+          // Gán sự kiện cho các link phân trang
+          const paginationLinks =
+            paginationContainer.querySelectorAll(".page-link");
+          paginationLinks.forEach((link) => {
+            link.addEventListener("click", function (e) {
+              e.preventDefault();
+              const page = this.getAttribute("data-page");
+              filterState.page = parseInt(page);
+              fetchProducts();
+            });
+          });
+        }
+
+        // Khởi tạo sự kiện cho pagination ban đầu
+        updatePagination(pagination.totalPages, pagination.currentPage);
+      });
+    </script>
+  </body>
+</html>
