@@ -130,18 +130,9 @@ class ReportController {
         },
         { $unwind: "$items" }, // Thay đổi từ $unwind: "$order_details"
         {
-          $lookup: {
-            from: "products", // Đảm bảo collection name đúng
-            localField: "items.product_id",
-            foreignField: "product_id", // Khớp với field trong collection products
-            as: "product",
-          },
-        },
-        { $unwind: "$product" },
-        {
           $group: {
             _id: "$items.product_id",
-            product_name: { $first: "$product.product_name" },
+            product_name: { $first: "$items.product_name" },
             totalRevenue: {
               $sum: {
                 $multiply: ["$items.price", "$items.quantity"],
