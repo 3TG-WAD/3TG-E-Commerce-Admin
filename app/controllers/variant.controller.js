@@ -3,105 +3,6 @@ const Variant = require("../models/variant.model");
 const mongoose = require("mongoose");
 
 class ProductController {
-  // async getProductList(req, res) {
-  //   try {
-  //     const {
-  //       page = 1,
-  //       limit = 10,
-  //       category,
-  //       manufacturer,
-  //       productName,
-  //       sort = "creation_time_desc",
-  //     } = req.query;
-
-  //     // Xây dựng query động
-  //     const query = {};
-
-  //     // Filter theo danh mục
-  //     if (category) {
-  //       query.category_id = category;
-  //     }
-
-  //     // Filter theo nhà sản xuất
-  //     if (manufacturer) {
-  //       query.manufacturer_id = manufacturer;
-  //     }
-
-  //     // Tìm kiếm theo tên sản phẩm
-  //     if (productName) {
-  //       query.product_name = {
-  //         $regex: productName,
-  //         $options: "i", // Case-insensitive
-  //       };
-  //     }
-
-  //     // Xây dựng logic sắp xếp
-  //     const sortOptions = {
-  //       creation_time_desc: { creation_time: -1 },
-  //       creation_time_asc: { creation_time: 1 },
-  //       price_asc: { price: 1 },
-  //       price_desc: { price: -1 },
-  //     };
-
-  //     const selectedSort =
-  //       sortOptions[sort] || sortOptions["creation_time_desc"];
-
-  //     // Cấu hình phân trang
-  //     const options = {
-  //       page: parseInt(page),
-  //       limit: parseInt(limit),
-  //       sort: selectedSort,
-  //     };
-
-  //     // Truy vấn sản phẩm
-  //     const products = await Product.paginate(query, options);
-
-  //     // Lấy các giá trị duy nhất của category_id và manufacturer_id
-  //     const categories = await Product.distinct("category_id");
-  //     const manufacturers = await Product.distinct("manufacturer_id");
-
-  //     // Kiểm tra xem request có phải AJAX không
-  //     if (req.xhr || req.headers.accept.includes("application/json")) {
-  //       return res.json({
-  //         products: products.docs,
-  //         totalPages: products.totalPages,
-  //         currentPage: products.page,
-  //         total: products.total,
-  //         categories,
-  //         manufacturers,
-  //       });
-  //     }
-
-  //     // Render trang nếu không phải AJAX
-  //     res.render("products/list", {
-  //       products: products.docs,
-  //       categories,
-  //       manufacturers,
-  //       pagination: {
-  //         totalPages: products.totalPages,
-  //         currentPage: products.page,
-  //         total: products.total,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("Product List Error:", error);
-
-  //     // Xử lý lỗi cho cả AJAX và non-AJAX
-  //     if (req.xhr || req.headers.accept.includes("application/json")) {
-  //       return res.status(500).json({
-  //         success: false,
-  //         message: error.message,
-  //       });
-  //     }
-
-  //     // Render trang lỗi nếu không phải AJAX
-  //     res.status(500).json({
-  //       success: false,
-  //       message: error.message,
-  //     });
-  //   }
-  // }
-
   async getProductList(req, res) {
     try {
       const {
@@ -113,7 +14,6 @@ class ProductController {
         sort = "creation_time_desc",
       } = req.query;
 
-      // Xây dựng match stage
       const matchStage = {};
       if (category) matchStage.category_id = category;
       if (manufacturer) matchStage.manufacturer_id = manufacturer;
@@ -124,7 +24,6 @@ class ProductController {
         };
       }
 
-      // Xây dựng sort stage
       const sortStages = {
         creation_time_desc: { creation_time: -1 },
         creation_time_asc: { creation_time: 1 },
@@ -134,12 +33,11 @@ class ProductController {
 
       const sortStage = sortStages[sort] || sortStages["creation_time_desc"];
 
-      // Aggregate pipeline
       const aggregatePipeline = [
         { $match: matchStage },
         {
           $lookup: {
-            from: "variants", // Collection name của variants
+            from: "variants",
             localField: "product_id",
             foreignField: "product_id",
             as: "variants",
@@ -153,7 +51,6 @@ class ProductController {
         { $sort: sortStage },
       ];
 
-      // Phân trang thủ công
       const skip = (page - 1) * limit;
 
       const [results, total] = await Promise.all([
@@ -167,11 +64,9 @@ class ProductController {
 
       const totalPages = Math.ceil(total[0]?.total / limit);
 
-      // Lấy các giá trị duy nhất
       const categories = await Product.distinct("category_id");
       const manufacturers = await Product.distinct("manufacturer_id");
 
-      // Trả về kết quả
       if (req.xhr || req.headers.accept.includes("application/json")) {
         return res.json({
           products: results,
@@ -183,7 +78,6 @@ class ProductController {
         });
       }
 
-      // Render trang
       res.render("products/list", {
         products: results,
         categories,
@@ -219,7 +113,6 @@ class ProductController {
         product_id: req.params.productId,
       });
 
-      // Tạo một bản sao an toàn của product
       const safeProduct = {
         ...product.toObject(),
         price: variant?.price || product.price || 0,
@@ -338,6 +231,18 @@ class ProductController {
       const variant = await Variant.findOne({
         product_id: req.params.productId,
       });
+
+      if (!product) {
+        return res
+          .status(404)
+          .render("error", { message: "Product not found" });
+      }
+      if (!variant) {
+        return res
+          .status(404)
+          .render("error", { message: "Product not found" });
+      }
+
       res.render("products/edit", { product, variant });
     } catch (error) {
       res.status(404).render("error", { message: "Sản phẩm không tồn tại" });

@@ -45,4 +45,29 @@
       <span>Logout</span>
     </a>
   </div>
+
+  <script>
+    document
+      .querySelector(".logout-btn")
+      .addEventListener("click", function (e) {
+        e.preventDefault();
+
+        fetch("/api/auth/logout", {
+          method: "GET",
+          credentials: "same-origin",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message === "Logged out successfully") {
+              window.location.href = "/login";
+            } else {
+              alert("Logged out unsuccessfully");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Error occurred:", error);
+          });
+      });
+  </script>
 </aside>
