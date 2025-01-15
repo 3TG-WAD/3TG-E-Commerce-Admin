@@ -1,9 +1,12 @@
 const express = require("express");
+const session = require("express-session");
 const bodyParser = require("body-parser");
 const config = require("./config/config");
 const connectDB = require("./config/database");
 const configureExpress = require("./config/express");
 // const adminRoutes = require("./app/routes/admin.route");
+const authMiddleware = require("./app/middleware/auth.middleware");
+const authRoutes = require("./app/routes/auth.route");
 const userRoutes = require("./app/routes/user.route");
 const productRoutes = require("./app/routes/product.route");
 const orderRoutes = require("./app/routes/order.route");
@@ -41,11 +44,23 @@ app.listen(config.server.port, () => {
 
 app.use(express.json());
 // app.use("/api/admin", adminRoutes);
-app.use("/api/users", userRoutes);
+app.use(
+  session({
+    secret: "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Chỉnh thành true nếu sử dụng HTTPS
+  })
+);
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+app.use("/api/auth", authRoutes);
+app.use("/api/users", authMiddleware, userRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/reports", reportRoutes);
-app.use("/api/variants", variantsRoutes);
+app.use("/api/orders", authMiddleware, orderRoutes);
+app.use("/api/reports", authMiddleware, reportRoutes);
+app.use("/api/variants", authMiddleware, variantsRoutes);
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
