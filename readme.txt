@@ -1,1 +1,0 @@
-Do nhóm em chưa hoàn thành đồ án kịp nên em xin phép tối 14/01/2025 em sẽ update video khi em nộp đồ án ạ. 

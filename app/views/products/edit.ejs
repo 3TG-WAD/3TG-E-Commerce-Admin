@@ -21,7 +21,7 @@
                         <a href="/api/variants" class="btn btn-secondary float-start me-3">
                             <i class="fas fa-arrow-left"></i>
                         </a>
-                        Chỉnh Sửa Sản Phẩm: <%= product.product_name %>
+                        Edit product: <%= product.product_name %>
                     </h2>
                     
                     <form action="/api/variants/edit/<%= product.product_id %>" method="POST" id="editProductForm">
@@ -30,38 +30,41 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label>Tên Sản Phẩm</label>
+                                <label>Product name</label>
                                 <input type="text" name="product_name" class="form-control" value="<%= product.product_name %>" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label>Giá</label>
+                                <label>Price</label>
                                 <input type="number" name="price" class="form-control" value="<%= variant.price || '' %>" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label>Mô Tả</label>
+                            <label>Description</label>
                             <textarea name="description" class="form-control" rows="3" required><%= product.description %></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label>Danh Mục</label>
+                                <label>Category</label>
                                 <select name="category_id" class="form-control" required>
-                                    <option value="LIFESTYLE_SHOES" <%= product.category_id === 'LIFESTYLE_SHOES' ? 'selected' : '' %>>Giày Lifestyle</option>
-                                    <option value="RUNNING_SHOES" <%= product.category_id === 'RUNNING_SHOES' ? 'selected' : '' %>>Giày Chạy Bộ</option>
+                                    <option value="LIFESTYLE_SHOES" <%= product.category_id === 'LIFESTYLE_SHOES' ? 'selected' : '' %>>Lifestyle Shoes</option>
+                                    <option value="RUNNING_SHOES" <%= product.category_id === 'RUNNING_SHOES' ? 'selected' : '' %>>Running shoes</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Hãng</label>
+                                <label>Manufacturer</label>
                                 <select name="manufacturer_id" class="form-control" required>
                                     <option value="NIKE" <%= product.manufacturer_id === 'NIKE' ? 'selected' : '' %>>Nike</option>
                                     <option value="ADIDAS" <%= product.manufacturer_id === 'ADIDAS' ? 'selected' : '' %>>Adidas</option>
                                     <option value="PUMA" <%= product.manufacturer_id === 'PUMA' ? 'selected' : '' %>>Puma</option>
+                                    <option value="UNDER AMOUR" <%= product.manufacturer_id === 'UNDER AMOUR' ? 'selected' : '' %>>Under Armour</option>
+                                    <option value="NEW BALANCE" <%= product.manufacturer_id === 'NEW BALANCE' ? 'selected' : '' %>>New Balance</option>
+                                    <option value="VANS" <%= product.manufacturer_id === 'VANS' ? 'selected' : '' %>>Vans</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label>Ngày Tạo</label>
+                                <label>Creation date</label>
                                 <input type="datetime-local" name="creation_time" class="form-control" 
                                        value="<%= new Date(product.creation_time).toISOString().slice(0,16) %>" required>
                             </div>
@@ -69,28 +72,28 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label>Màu Sắc</label>
+                                <label>Color</label>
                                 <input type="text" name="color" class="form-control" value="<%= variant.color || '' %>">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label>Chất Liệu</label>
+                                <label>Material</label>
                                 <input type="text" name="material" class="form-control" value="<%= variant.material || '' %>">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label>Số Lượng Tồn</label>
+                                <label>In stock</label>
                                 <input type="number" name="in_stock" class="form-control" value="<%= variant.in_stock || 0 %>">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label>Giảm Giá (%)</label>
+                                <label>Discount (%)</label>
                                 <input type="number" name="discount" class="form-control" value="<%= variant.discount || 0 %>">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label>Hình Ảnh (Mỗi đường link một dòng)</label>
+                            <label>Image (each link on a line)</label>
                             <textarea name="photos" class="form-control" rows="3" placeholder="Input image URLs here">
                               <% if (product.photos && product.photos.length > 0) { %>
                               <%= product.photos.join('\n') %>
@@ -100,10 +103,10 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="/api/variants" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Hủy
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Cập Nhật Sản Phẩm
+                                <i class="fas fa-save"></i> Update
                             </button>
                         </div>
                     </form>
@@ -116,19 +119,16 @@
       document.getElementById('editProductForm').addEventListener('submit', function(e) {
           e.preventDefault();
       
-          // Tạo FormData từ form
           const formData = new FormData(this);
           const data = {};
           for (let [key, value] of formData.entries()) {
               data[key] = value;
           }
       
-          // Log dữ liệu trước khi gửi
           console.log("Sending Data:", data);
       
-          // Gửi request
           fetch(this.action, {
-              method: "PUT", // Sử dụng PUT method
+              method: "PUT",
               headers: {
                   "Content-Type": "application/json",
               },
@@ -148,7 +148,7 @@
           })
           .catch((error) => {
               console.error("Error:", error);
-              alert("Có lỗi xảy ra");
+              alert("Error");
           });
       });
     </script>
