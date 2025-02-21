@@ -149,7 +149,6 @@ class OrderController {
         });
       }
 
-      // Render bình thường
       res.render("dashboard", {
         totalOrders,
         totalRevenue: totalRevenue[0]?.total || 0,
@@ -174,11 +173,10 @@ class OrderController {
         },
       });
     } catch (error) {
-      console.error("Chi tiết lỗi render dashboard:", error);
+      console.error("Error rendering dashboard:", error);
 
-      // Render trang lỗi chi tiết
       res.status(500).render("error", {
-        message: "Lỗi tải trang dashboard",
+        message: "Error loading dashboard",
         error: {
           name: error.name,
           message: error.message,
@@ -193,14 +191,12 @@ class OrderController {
       const { orderId } = req.params;
       const { status } = req.body;
 
-      // Tìm theo order_id
       const order = await OrderModel.findOne({ order_id: orderId });
 
       if (!order) {
-        return ResponseHandler.notFound(res, "Đơn hàng không tồn tại");
+        return ResponseHandler.notFound(res, "Order does not exist");
       }
 
-      // Validate trạng thái
       const validStatuses = [
         "pending",
         "processing",
@@ -210,7 +206,7 @@ class OrderController {
       ];
 
       if (!validStatuses.includes(status)) {
-        return ResponseHandler.badRequest(res, "Trạng thái không hợp lệ");
+        return ResponseHandler.badRequest(res, "Invalid status");
       }
 
       order.status = status;
@@ -219,7 +215,7 @@ class OrderController {
       return ResponseHandler.success(res, order);
     } catch (error) {
       console.error("Update order status error:", error);
-      return ResponseHandler.error(res, "Lỗi cập nhật trạng thái đơn hàng");
+      return ResponseHandler.error(res, "Error updating order status");
     }
   }
 
@@ -239,7 +235,7 @@ class OrderController {
 
       if (!order) {
         return res.status(404).render("error", {
-          message: "Đơn hàng không tồn tại",
+          message: "Order does not exist",
         });
       }
 
@@ -255,7 +251,7 @@ class OrderController {
     } catch (error) {
       console.error("Get order details error:", error);
       res.status(500).render("error", {
-        message: "Lỗi truy xuất chi tiết đơn hàng",
+        message: "Error accessing order details",
       });
     }
   }
