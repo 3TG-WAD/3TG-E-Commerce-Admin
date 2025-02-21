@@ -1,11 +1,9 @@
 const validateAdminProfile = (data) => {
-  // Implement validation logic for admin profile
-  return data; // Return validated data
+  return data;
 };
 
 const validateProductInput = (data) => {
-  // Implement validation logic for product input
-  return data; // Return validated data
+  return data;
 };
 
 module.exports = {
