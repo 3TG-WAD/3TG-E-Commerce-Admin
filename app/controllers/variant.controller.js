@@ -89,7 +89,7 @@ class ProductController {
         },
       });
     } catch (error) {
-      console.error("Product List Error:", error);
+      console.error("Product Listing Error:", error);
       res.status(500).json({
         success: false,
         message: error.message,
@@ -106,7 +106,7 @@ class ProductController {
       if (!product) {
         return res
           .status(404)
-          .render("error", { message: "Sản phẩm không tồn tại" });
+          .render("error", { message: "Product not found" });
       }
 
       const variant = await Variant.findOne({
@@ -127,7 +127,7 @@ class ProductController {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).render("error", { message: "Lỗi hệ thống" });
+      res.status(500).render("error", { message: "System error" });
     }
   }
 
@@ -155,7 +155,7 @@ class ProductController {
       } = req.body;
 
       if (!product_id) {
-        throw new Error("Mã sản phẩm không được để trống");
+        throw new Error("Product Id cannot be empty");
       }
 
       const photoLinks = photos
@@ -164,7 +164,7 @@ class ProductController {
             .map((link) => link.trim())
             .filter((link) => link !== "")
         : [];
-      // Create product
+      
       const newProduct = new Product({
         product_id,
         product_name,
@@ -178,7 +178,6 @@ class ProductController {
 
       console.log(newProduct);
 
-      // Create variant
       const newVariant = new Variant({
         variant_id: `VAR-${product_id}`,
         product_id: product_id,
@@ -206,7 +205,7 @@ class ProductController {
 
       return res.json({
         success: true,
-        message: "Tạo sản phẩm thành công",
+        message: "Create product successfully",
         redirectUrl: "/api/variants",
       });
     } catch (error) {
@@ -245,44 +244,9 @@ class ProductController {
 
       res.render("products/edit", { product, variant });
     } catch (error) {
-      res.status(404).render("error", { message: "Sản phẩm không tồn tại" });
+      res.status(404).render("error", { message: "Product not found" });
     }
   }
-
-  // updateProduct = async (req, res) => {
-  //   const session = await mongoose.startSession();
-  //   session.startTransaction();
-
-  //   try {
-  //     const { product_id, photos, ...updateData } = req.body;
-
-  //     // Cập nhật product
-  //     await Product.findOneAndUpdate(
-  //       { product_id },
-  //       {
-  //         ...updateData,
-  //         photos: Array.isArray(photos) ? photos : [photos],
-  //       },
-  //       { session }
-  //     );
-
-  //     // Cập nhật variant
-  //     await Variant.findOneAndUpdate({ product_id }, updateData, { session });
-  //     console.log("Updated variant");
-  //     await session.commitTransaction();
-  //     session.endSession();
-
-  //     res.redirect("/api/variants");
-  //   } catch (error) {
-  //     await session.abortTransaction();
-  //     session.endSession();
-
-  //     res.status(400).render("products/edit", {
-  //       error: error.message,
-  //       product: req.body,
-  //     });
-  //   }
-  // };
 
   updateProduct = async (req, res) => {
     try {
@@ -290,7 +254,6 @@ class ProductController {
 
       console.log("Full Request Body:", req.body);
 
-      // Xử lý ảnh - loại bỏ khoảng trắng thừa
       const photoLinks = photos
         ? photos
             .split("\n")
@@ -298,7 +261,6 @@ class ProductController {
             .filter((link) => link !== "")
         : [];
 
-      // Cập nhật product
       const updatedProduct = await Product.findOneAndUpdate(
         { product_id },
         {
@@ -309,7 +271,6 @@ class ProductController {
         { new: true }
       );
 
-      // Cập nhật variant
       const updatedVariant = await Variant.findOneAndUpdate(
         { product_id },
         {
@@ -324,7 +285,7 @@ class ProductController {
 
       return res.json({
         success: true,
-        message: "Cập nhật sản phẩm thành công",
+        message: "Update product successfully",
         redirectUrl: "/api/variants",
       });
     } catch (error) {
@@ -355,7 +316,7 @@ class ProductController {
         req.body;
 
       const newVariant = new Variant({
-        variant_id: `VAR-${product_id}-${color}`, // Unique variant ID based on product and color
+        variant_id: `VAR-${product_id}-${color}`,
         product_id,
         color,
         material,
@@ -440,7 +401,6 @@ class ProductController {
     } catch (error) {
       console.error(error);
 
-      // Kiểm tra nếu là request AJAX
       if (req.xhr || req.headers.accept.includes("application/json")) {
         return res.status(500).json({
           success: false,
@@ -448,7 +408,6 @@ class ProductController {
         });
       }
 
-      // Nếu không phải AJAX thì render error
       res.status(500).render("error", { message: error.message });
     }
   }
