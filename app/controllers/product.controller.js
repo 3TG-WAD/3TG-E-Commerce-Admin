@@ -56,16 +56,16 @@ class ProductController {
         },
       });
     } catch (error) {
-      console.error("Lỗi render trang sản phẩm:", error);
+      console.error("Error rendering product page", error);
 
       try {
         res.status(500).render("500", {
-          message: "Lỗi hệ thống",
+          message: "System error",
           error: error.message,
         });
       } catch (renderError) {
         res.status(500).json({
-          message: "Lỗi hệ thống",
+          message: "System error",
           error: error.message,
         });
       }
