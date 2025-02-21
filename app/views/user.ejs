@@ -186,7 +186,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // Giữ nguyên toàn bộ script cũ
       document.addEventListener("DOMContentLoaded", function () {
         const sortBySelect = document.getElementById('sort-by');
         const sortOrderSelect = document.getElementById('sort-order');
@@ -227,7 +226,6 @@
       });
 
       document.addEventListener('DOMContentLoaded', function() {
-        // Sự kiện cho nút xóa người dùng
         document.getElementById('user-list').addEventListener('click', function(event) {
           const deleteButton = event.target.closest('.delete-user');
           
@@ -235,14 +233,12 @@
             const userId = deleteButton.getAttribute('data-user-id');
             console.log(userId);
             
-            // Hiển thị xác nhận
-            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái người dùng này?')) {
+            if (confirm('Do you want to change this user status?')) {
               toggleUserStatus(userId);
             }
           }
         });
       
-        // Hàm gọi API thay đổi trạng thái
         async function toggleUserStatus(userId) {
           try {
             const response = await fetch(`/api/users/${userId}/status`, {
@@ -256,7 +252,6 @@
             const result = await response.json();
       
             if (result.success) {
-              // Cập nhật trạng thái trên giao diện
               const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
               const statusBadge = userRow.querySelector('.badge');
               
@@ -270,13 +265,13 @@
                 statusBadge.classList.add('bg-danger');
               }
       
-              alert('Thay đổi trạng thái người dùng thành công');
+              alert('Update user status successfully');
             } else {
-              alert(result.message || 'Có lỗi xảy ra');
+              alert(result.message || 'Error occurs');
             }
           } catch (error) {
             console.error('Lỗi:', error);
-            alert('Không thể thay đổi trạng thái người dùng');
+            alert('Cannot change the user status');
           }
         }
       });
