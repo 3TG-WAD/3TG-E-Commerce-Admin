@@ -48,7 +48,7 @@ class ReportController {
         {
           $match: matchCondition,
         },
-        { $unwind: "$items" }, // Thay đổi từ $unwind: "$order_details"
+        { $unwind: "$items" },
         {
           $group: {
             _id: "$items.product_id",
